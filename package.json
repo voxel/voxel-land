@@ -1,16 +1,16 @@
 {
-    "name": "voxel-land",
-    "description": "generate landforms for voxel-engine",
-    "version": "0.0.1",
-    "repository": {
-        "type": "git",
-        "url": "git@github.com:deathcap/voxel-land.git"
-    },
-    "dependencies": {
-        "voxel-perlin-terrain": "1.0.0",
-        "voxel-forest": "git://github.com/deathcap/voxel-forest.git"
-    },
-    "peerDependencies": {
-        "voxel-engine": ">=0.19.0"
-    }
+  "name": "voxel-land",
+  "description": "generate landforms for voxel-engine",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:deathcap/voxel-land.git"
+  },
+  "dependencies": {
+    "voxel-forest": "git://github.com/deathcap/voxel-forest.git",
+    "perlin": "~1.0.0"
+  },
+  "peerDependencies": {
+    "voxel-engine": ">=0.19.0"
+  }
 }

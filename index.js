@@ -1,8 +1,7 @@
 // # vim: set shiftwidth=2 tabstop=2 softtabstop=2 expandtab:
 
-var createTerrain = require('voxel-perlin-terrain');
 var createTree = require('voxel-forest');
-
+var perlin = require('perlin');
 
 module.exports = function(game, opts) {
   return new Land(game, opts);
@@ -11,11 +10,45 @@ module.exports = function(game, opts) {
 function Land(game, opts) {
   this.game = game;
   this.seed = opts.seed || 'foo';
-  this.materials = opts.materials || {stone: 3, bark: 4, leaves:9};
+  this.materials = opts.materials || {grass: 1, dirt: 2, stone: 3, bark: 4, leaves:9};
+  this.crustLower = opts.crustLower || 0;
+  this.crustUpper = opts.crustUpper || 5;
+  this.perlinDivisor = opts.perlinDivisor || 20;
 
-  this.generateGround = createTerrain(this.seed, 0, 5, 20);
+  this.noise = perlin.noise;
+  this.noise.seed(opts.seed);
 
   this.bindEvents();
+}
+
+// calculate terrain height based on perlin noise 
+// see @maxogden's voxel-perlin-terrain https://github.com/maxogden/voxel-perlin-terrain
+Land.prototype.generateHeightMap = function(position, width) {
+  var startX = position[0] * width;
+  var startY = position[1] * width;
+  var startZ = position[2] * width;
+  var heightMap = new Int8Array(width * width);
+
+  for (var x = startX; x < startX + width; x++) {
+    for (var z = startZ; z < startZ + width; z++) {
+      var n = this.noise.simplex2(x / this.perlinDivisor, z / this.perlinDivisor);
+      var y = ~~scale(n, -1, 1, this.crustLower, this.crustUpper);
+
+      if (y === this.crustLower || startY < y && y < startY + width) {
+        var xidx = Math.abs((width + x % width) % width);
+        var yidx = Math.abs((width + y % width) % width);
+        var zidx = Math.abs((width + z % width) % width);
+        var idx = xidx + yidx * width + zidx * width * width;
+        heightMap[xidx + zidx * width] = yidx;
+      }
+    }
+  }
+
+  return heightMap;
+};
+
+function scale( x, fromLow, fromHigh, toLow, toHigh ) {
+  return ( x - fromLow ) * ( toHigh - toLow ) / ( fromHigh - fromLow ) + toLow;
 }
 
 Land.prototype.bindEvents = function() {
@@ -23,35 +56,45 @@ Land.prototype.bindEvents = function() {
 
   this.game.voxels.on('missingChunk', this.missingChunk = function(p) {
     var width = self.game.chunkSize;
-    var voxels;
+    var voxels = new Int8Array(width * width * width);
 
     if (p[1] === 0) {
       // ground surface level
-      voxels = self.generateGround(p, width); // TODO: configurable material (dirt)
-      // TODO: fill voxels below with dirt
+      var heightMap = self.generateHeightMap(p, width);
 
-      // populate chunk with trees
-      // TODO: populate later, so structures can cross chunks??
-      createTree(self.game, {
-        bark: self.materials.bark,
-        leaves: self.materials.leaves,
-        position: {x:width/2, y:0, z:width/2}, // TODO: position at top of surface
-        treetype: 1,
-        setBlock: function (pos, value) {
-          idx = pos.x + pos.y * width + pos.z * width * width;
-          voxels[idx] = value;
-          return false;  // returning true stops tree
+      for (var x = 0; x < width; ++x) {
+        for (var z = 0; z < width; ++z) {
+          var height = heightMap[x + z * width];
+          var y = height;
+
+          // dirt with grass on top
+          voxels[x + y * width + z * width * width] = self.materials.grass;
+          while(y-- > 0)
+            voxels[x + y * width + z * width * width] = self.materials.dirt;
+
+          // populate chunk with trees
+          // TODO: populate later, so structures can cross chunks??
+          if (x === width/2 && z === width/2)  // TODO: populate randomly based on seed
+            createTree(self.game, { 
+              bark: self.materials.bark,
+              leaves: self.materials.leaves,
+              position: {x:x, y:height + 1, z:z}, // position at top of surface
+              treetype: 1,
+              setBlock: function (pos, value) {
+                idx = pos.x + pos.y * width + pos.z * width * width;
+                voxels[idx] = value;
+                return false;  // returning true stops tree
+              }
+            });
         }
-      });
+      }
     } else if (p[1] > 0) {
       // empty space above ground
-      voxels = new Int8Array(width * width * width);
     } else {
       // below ground
       // TODO: ores
-      voxels = new Int8Array(width * width * width);
       for (var i = 0; i < width * width * width; ++i) {
-        voxels[i] = self.materials.stone;  // stone
+        voxels[i] = self.materials.stone;
       }
     }
 
