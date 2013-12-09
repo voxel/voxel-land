@@ -14,6 +14,7 @@ function Land(game, opts) {
   this.crustLower = opts.crustLower || 0;
   this.crustUpper = opts.crustUpper || 5;
   this.perlinDivisor = opts.perlinDivisor || 20;
+  this.populateTrees = (opts.populateTrees !== undefined) ? opts.populateTrees : true;
 
   this.noise = perlin.noise;
   this.noise.seed(opts.seed);
@@ -80,7 +81,7 @@ Land.prototype.bindEvents = function() {
 
           // populate chunk with trees
           // TODO: populate later, so structures can cross chunks??
-          if (x === width/2 && z === width/2)  // TODO: populate randomly based on seed
+          if (self.populateTrees && x === width/2 && z === width/2)  // TODO: populate randomly based on seed
             createTree(self.game, { 
               bark: self.materials.bark,
               leaves: self.materials.leaves,
