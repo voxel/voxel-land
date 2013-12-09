@@ -17,9 +17,15 @@ function Land(game, opts) {
 
   this.noise = perlin.noise;
   this.noise.seed(opts.seed);
-
-  this.bindEvents();
 }
+
+Land.prototype.enable = function() {
+  this.bindEvents();
+};
+
+Land.prototype.disable = function() {
+  this.unbindEvents();
+};
 
 // calculate terrain height based on perlin noise 
 // see @maxogden's voxel-perlin-terrain https://github.com/maxogden/voxel-perlin-terrain
@@ -109,5 +115,5 @@ Land.prototype.bindEvents = function() {
 };
 
 Land.prototype.unbindEvents = function() {
-  this.game.removeListener('missingChunk', this.missingChunk);
+  this.game.voxels.removeListener('missingChunk', this.missingChunk);
 };
