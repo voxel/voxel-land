@@ -1,0 +1,6 @@
+# voxel-land
+
+## License
+
+MIT
+
