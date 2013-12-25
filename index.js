@@ -12,8 +12,8 @@ function Land(game, opts) {
   this.game = game;
   this.seed = opts.seed || 'foo';
   this.materials = opts.materials || {grass: 1, dirt: 2, stone: 3, bark: 4, leaves:9};
-  this.crustLower = opts.crustLower || 0; // TODO: 0
-  this.crustUpper = opts.crustUpper || 5;
+  this.crustLower = opts.crustLower === undefined ? 0 : opts.crustLower;
+  this.crustUpper = opts.crustUpper === undefined ? 5 : opts.crustUpper;
   this.perlinDivisor = opts.perlinDivisor || 20;
   this.populateTrees = (opts.populateTrees !== undefined) ? opts.populateTrees : true;
 
