@@ -17,8 +17,8 @@ function Land(game, opts) {
   this.perlinDivisor = opts.perlinDivisor || 20;
   this.populateTrees = (opts.populateTrees !== undefined) ? opts.populateTrees : true;
 
-  var alea = new Alea(this.seed);
-  function seedFunc() { return alea(); };
+  var random = this.random = new Alea(this.seed);
+  function seedFunc() { return random(); };
 
   this.noise = new SimplexNoise(seedFunc);
   this.enable();
