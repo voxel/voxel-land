@@ -13,14 +13,18 @@ function Land(game, opts) {
   this.seed = opts.seed || 'foo';
   this.materials = opts.materials || {grass: 1, dirt: 2, stone: 3, bark: 4, leaves:9};
   this.crustLower = opts.crustLower === undefined ? 0 : opts.crustLower;
-  this.crustUpper = opts.crustUpper === undefined ? 5 : opts.crustUpper;
-  this.perlinDivisor = opts.perlinDivisor || 20;
+  this.crustUpper = opts.crustUpper === undefined ? 2 : opts.crustUpper;
+  this.hillScale = opts.hillScale || 20;
+  this.roughnessScale = opts.roughnessScale || 200;
   this.populateTrees = (opts.populateTrees !== undefined) ? opts.populateTrees : true;
 
   var random = this.random = new Alea(this.seed);
-  function seedFunc() { return random(); };
 
-  this.noise = new SimplexNoise(seedFunc);
+  var randomHills = new Alea(random());
+  var randomRoughness = new Alea(random());
+
+  this.noiseHills = new SimplexNoise(function() { return randomHills(); });
+  this.noiseRoughness = new SimplexNoise(function() { return randomRoughness(); });
   this.enable();
 }
 
@@ -42,8 +46,16 @@ Land.prototype.generateHeightMap = function(position, width) {
 
   for (var x = startX; x < startX + width; x++) {
     for (var z = startZ; z < startZ + width; z++) {
-      var n = this.noise.noise2D(x / this.perlinDivisor, z / this.perlinDivisor);
-      var y = ~~scale(n, -1, 1, this.crustLower, this.crustUpper);
+
+      // large scale ruggedness of terrain
+      var roughness = this.noiseRoughness.noise2D(x / this.roughnessScale, z / this.roughnessScale);
+      roughnessTerm = Math.floor(Math.pow(scale(roughness, -1, 1, 0, 2), 5));
+
+      // smaller scale local hills
+      var n = this.noiseHills.noise2D(x / this.hillScale, z / this.hillScale);
+      var y = ~~scale(n, -1, 1, this.crustLower, this.crustUpper + roughnessTerm);
+      if (roughnessTerm < 1) y = this.crustLower; // completely flat ("plains")
+      //y = roughnessFactor; // to debug roughness map
 
       if (y === this.crustLower || startY < y && y < startY + width) {
         var xidx = Math.abs((width + x % width) % width);
