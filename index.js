@@ -74,6 +74,29 @@ function scale( x, fromLow, fromHigh, toLow, toHigh ) {
   return ( x - fromLow ) * ( toHigh - toLow ) / ( fromHigh - fromLow ) + toLow;
 }
 
+Land.prototype.populateChunk = function(x, height, z, voxels) {
+  var self = this;
+
+  var width = self.game.chunkSize;
+
+  // populate chunk with trees TODO: customizable
+
+  // TODO: populate later, so structures can cross chunks??
+  if (self.populateTrees && x === width/2 && z === width/2)  // TODO: populate randomly based this.random
+    createTree(self.game, { 
+      bark: self.materials.bark,
+      leaves: self.materials.leaves,
+      position: {x:x, y:height + 1, z:z}, // position at top of surface
+      treetype: 1,
+      setBlock: function (pos, value) {
+        idx = pos.x + pos.y * width + pos.z * width * width;
+        voxels[idx] = value;
+        return false;  // returning true stops tree
+      }
+    });
+};
+
+
 Land.prototype.bindEvents = function() {
   var self = this;
 
@@ -95,20 +118,8 @@ Land.prototype.bindEvents = function() {
           while(y-- > 0)
             voxels[x + y * width + z * width * width] = self.materials.dirt;
 
-          // populate chunk with trees
-          // TODO: populate later, so structures can cross chunks??
-          if (self.populateTrees && x === width/2 && z === width/2)  // TODO: populate randomly based on seed
-            createTree(self.game, { 
-              bark: self.materials.bark,
-              leaves: self.materials.leaves,
-              position: {x:x, y:height + 1, z:z}, // position at top of surface
-              treetype: 1,
-              setBlock: function (pos, value) {
-                idx = pos.x + pos.y * width + pos.z * width * width;
-                voxels[idx] = value;
-                return false;  // returning true stops tree
-              }
-            });
+          // features
+          self.populateChunk(x, y, z, voxels);
         }
       }
     } else if (p[1] > 0) {
