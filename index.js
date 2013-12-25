@@ -22,9 +22,11 @@ function Land(game, opts) {
 
   var randomHills = new Alea(random());
   var randomRoughness = new Alea(random());
+  var randomTrees = new Alea(random());
 
   this.noiseHills = new SimplexNoise(function() { return randomHills(); });
   this.noiseRoughness = new SimplexNoise(function() { return randomRoughness(); });
+  this.noiseTrees = new SimplexNoise(function() { return randomTrees(); });
   this.enable();
 }
 
@@ -75,25 +77,28 @@ function scale( x, fromLow, fromHigh, toLow, toHigh ) {
 }
 
 Land.prototype.populateChunk = function(x, height, z, voxels) {
-  var self = this;
-
-  var width = self.game.chunkSize;
+  var width = this.game.chunkSize;
 
   // populate chunk with trees TODO: customizable
 
   // TODO: populate later, so structures can cross chunks??
-  if (self.populateTrees && x === width/2 && z === width/2)  // TODO: populate randomly based this.random
-    createTree(self.game, { 
-      bark: self.materials.bark,
-      leaves: self.materials.leaves,
-      position: {x:x, y:height + 1, z:z}, // position at top of surface
-      treetype: 1,
-      setBlock: function (pos, value) {
-        idx = pos.x + pos.y * width + pos.z * width * width;
-        voxels[idx] = value;
-        return false;  // returning true stops tree
-      }
-    });
+  if (this.populateTrees) {
+    var n = this.noiseTrees.noise2D(x, z); // [-1,1]
+    if (n < 0) {
+      createTree(this.game, { 
+        bark: this.materials.bark,
+        leaves: this.materials.leaves,
+        //position: {x:x, y:height + 1, z:z}, // position at top of surface
+        position: {x:width/2, y:height + 1, z:width/2}, // position at top of surface
+        treetype: 1,
+        setBlock: function (pos, value) {
+          idx = pos.x + pos.y * width + pos.z * width * width;
+          voxels[idx] = value;
+          return false;  // returning true stops tree
+        }
+      });
+    }
+  }
 };
 
 
@@ -118,10 +123,10 @@ Land.prototype.bindEvents = function() {
           while(y-- > 0)
             voxels[x + y * width + z * width * width] = self.materials.dirt;
 
-          // features
-          self.populateChunk(x, y, z, voxels);
         }
       }
+      // features
+      self.populateChunk(x, y, z, voxels);
     } else if (p[1] > 0) {
       // empty space above ground
     } else {
