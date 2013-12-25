@@ -1,6 +1,6 @@
 // # vim: set shiftwidth=2 tabstop=2 softtabstop=2 expandtab:
 
-var createTree = require('voxel-forest');
+var createTree = require('voxel-trees');
 var SimplexNoise = require('simplex-noise');
 var Alea = require('alea');
 
