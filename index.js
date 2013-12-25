@@ -1,7 +1,8 @@
 // # vim: set shiftwidth=2 tabstop=2 softtabstop=2 expandtab:
 
 var createTree = require('voxel-forest');
-var perlin = require('perlin');
+var SimplexNoise = require('simplex-noise');
+var Alea = require('alea');
 
 module.exports = function(game, opts) {
   return new Land(game, opts);
@@ -11,13 +12,16 @@ function Land(game, opts) {
   this.game = game;
   this.seed = opts.seed || 'foo';
   this.materials = opts.materials || {grass: 1, dirt: 2, stone: 3, bark: 4, leaves:9};
-  this.crustLower = opts.crustLower || 0;
+  this.crustLower = opts.crustLower || 0; // TODO: 0
   this.crustUpper = opts.crustUpper || 5;
   this.perlinDivisor = opts.perlinDivisor || 20;
   this.populateTrees = (opts.populateTrees !== undefined) ? opts.populateTrees : true;
 
-  this.noise = perlin.noise;
-  this.noise.seed(opts.seed);
+  var alea = new Alea(this.seed);
+  function seedFunc() { return alea(); };
+
+  this.noise = new SimplexNoise(seedFunc);
+  this.enable();
 }
 
 Land.prototype.enable = function() {
@@ -38,7 +42,7 @@ Land.prototype.generateHeightMap = function(position, width) {
 
   for (var x = startX; x < startX + width; x++) {
     for (var z = startZ; z < startZ + width; z++) {
-      var n = this.noise.simplex2(x / this.perlinDivisor, z / this.perlinDivisor);
+      var n = this.noise.noise2D(x / this.perlinDivisor, z / this.perlinDivisor);
       var y = ~~scale(n, -1, 1, this.crustLower, this.crustUpper);
 
       if (y === this.crustLower || startY < y && y < startY + width) {
