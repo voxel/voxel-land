@@ -40,17 +40,13 @@ Land.prototype.bindEvents = function() {
   self.worker.postMessage({cmd: 'configure', opts:self.opts});
 
   this.game.voxels.on('missingChunk', this.missingChunk = function(pos) {
-    console.log('sending generateChunk to worker');
     self.worker.postMessage({cmd: 'generateChunk', pos:pos})
   });
 
   self.worker.addEventListener('message', function(ev) {
-    console.log('got message:',ev,ev.data.cmd);
-
     if (ev.data.cmd === 'chunkGenerated') {
       var chunk = ev.data.chunk;
 
-      console.log('showing chunk',chunk);
       self.game.showChunk(chunk);
     }
   });

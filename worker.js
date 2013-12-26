@@ -58,7 +58,7 @@ function scale( x, fromLow, fromHigh, toLow, toHigh ) {
   return ( x - fromLow ) * ( toHigh - toLow ) / ( fromHigh - fromLow ) + toLow;
 }
 
-ChunkGenerator.prototype.populateChunk = function(x, height, z, voxels) {
+ChunkGenerator.prototype.populateChunk = function(x, heightMap, z, voxels) {
   var width = this.opts.chunkSize;
 
   // populate chunk with trees TODO: customizable
@@ -66,15 +66,26 @@ ChunkGenerator.prototype.populateChunk = function(x, height, z, voxels) {
   // TODO: populate later, so structures can cross chunks??
   if (this.opts.populateTrees) {
     var n = this.noiseTrees.noise2D(x, z); // [-1,1]
-    if (n < 0) {
-      createTree(null, { 
+
+    if (n < 0) { // not all chunks have trees
+
+      // in middle of chunk for now (until can cross chunks)
+      var dx = width / 2;
+      var dz = width / 2;
+
+      // position at top of surface
+      var y = heightMap[dx + dz * width] + 1;
+
+      var treeHeight = ~~scale(n, -1, 0, 4, 16);
+
+      createTree({ 
+        height: treeHeight,
         bark: this.opts.materials.bark,
         leaves: this.opts.materials.leaves,
-        //position: {x:x, y:height + 1, z:z}, // position at top of surface
-        position: {x:width/2, y:height + 1, z:width/2}, // position at top of surface
+        position: {x:dx, y:y, z:dz},
         treetype: 1,
         setBlock: function (pos, value) {
-          idx = pos.x + pos.y * width + pos.z * width * width;
+          var idx = pos.x + pos.y * width + pos.z * width * width;
           voxels[idx] = value;
           return false;  // returning true stops tree
         }
@@ -95,15 +106,21 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
   console.log('lag done');
   */
 
-  console.log('in generateChunk',pos);
+  /* to generate only specific chunks for testing
+  var cstr = pos[0] + ',' + pos[2];
+  var okc = [ 
+"-1,-1",
+"0,0"];
+  if (okc.indexOf(cstr) == -1) return;
+  */
+
   if (pos[1] === 0) {
     // ground surface level
     var heightMap = this.generateHeightMap(pos, width);
 
     for (var x = 0; x < width; ++x) {
       for (var z = 0; z < width; ++z) {
-        var height = heightMap[x + z * width];
-        var y = height;
+        var y = heightMap[x + z * width];
 
         // dirt with grass on top
         voxels[x + y * width + z * width * width] = this.opts.materials.grass;
@@ -113,7 +130,7 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
       }
     }
     // features
-    this.populateChunk(x, y, z, voxels);
+    this.populateChunk(pos[0], heightMap, pos[2], voxels);
   } else if (pos[1] > 0) {
     // empty space above ground
   } else {
@@ -130,19 +147,15 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
     voxels: voxels
   }
 
-  console.log('about to send chunkGenerated');
   this.worker.postMessage({cmd: 'chunkGenerated', chunk:chunk});
 };
 
 module.exports = function() {
   var gen;
   ever(this).on('message', function(ev) {
-    console.log('worker got '+JSON.stringify(ev.data));
 
     if (ev.data.cmd === 'configure') {
-      console.log('configuring');
       gen = new ChunkGenerator(this, ev.data.opts);
-      console.log('gen=',gen);
     } else if (ev.data.cmd === 'generateChunk') {
       if (gen === undefined) throw "voxel-land web worker error: received 'generateChunk' before 'configure'";
       gen.generateChunk(ev.data.pos);
