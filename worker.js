@@ -76,10 +76,10 @@ ChunkGenerator.prototype.populateChunk = function(x, heightMap, z, voxels) {
       // position at top of surface
       var y = heightMap[dx + dz * width] + 1;
 
-      var treeHeight = ~~scale(n, -1, 0, 4, 16);
+      var random = new Alea(x*z);
 
       createTree({ 
-        height: treeHeight,
+        random: random,
         bark: this.opts.materials.bark,
         leaves: this.opts.materials.leaves,
         position: {x:dx, y:y, z:dz},
