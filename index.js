@@ -4,14 +4,27 @@ var webworkify = require('webworkify');
 
 module.exports = function(game, opts) {
   return new Land(game, opts);
-}
+};
+
+module.exports.pluginInfo = {
+  loadAfter: ['voxel-registry']
+};
 
 function Land(game, opts) {
   this.game = game;
-  opts = opts || {};
 
+  if (!game.plugins || !game.plugins.get('voxel-registry')) throw 'voxel-land requires voxel-registry';
+  var registry = game.plugins.get('voxel-registry');
+
+  opts = opts || {};
   opts.seed = opts.seed || 'foo';
-  opts.materials = opts.materials || {grass: 1, dirt: 2, stone: 3, bark: 4, leaves:9};
+  opts.materials = opts.materials || {  // TODO: how about getting directly instead of having this map here?
+    grass: registry.getBlockID('grass'),
+    dirt: registry.getBlockID('dirt'),
+    stone: registry.getBlockID('stone'),
+    bark: registry.getBlockID('logOak'),
+    leaves: registry.getBlockID('leavesOak')};
+
   opts.crustLower = opts.crustLower === undefined ? 0 : opts.crustLower;
   opts.crustUpper = opts.crustUpper === undefined ? 2 : opts.crustUpper;
   opts.hillScale = opts.hillScale || 20;
