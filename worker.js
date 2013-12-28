@@ -75,10 +75,25 @@ ChunkGenerator.prototype.decorate = function(random, chunkX, chunkY, chunkZ, chu
   var startZ = chunkZ * width;
 
   // TODO: iterate list of 'decorators'
-  if (!this.opts.populateTrees) 
-    return;
+
+  // "craters" (TODO: fill with water to make lakes)
+  if (random() < 0.30) {
+    var radius = ~~(random() * 10);
+    for (var dx = -radius; dx <= radius; ++dx) {
+      for (var dy = -radius; dy <= radius; ++dy) {
+        for (var dz = -radius; dz <= radius; ++dz) {
+          var distance = Math.sqrt(dx*dx + dy*dy + dz*dz); // TODO: better algorithm
+          if (distance < radius)
+            changes.push([[startX+dx, startY+dy, startZ+dz], 0]);
+        }
+      }
+    }
+    return changes; // don't generate trees on top TODO: smarter - update heightmap maybe
+  }
 
   // trees
+  if (!this.opts.populateTrees) 
+    return;
 
   // TODO: large-scale biomes, with higher tree density? forests
   var treeCount = ~~scale(this.noiseTrees.noise2D(chunkX / this.opts.treesScale, chunkZ / this.opts.treesScale), -1, 1, 0, this.opts.treesMaxDensity);
@@ -113,19 +128,6 @@ ChunkGenerator.prototype.decorate = function(random, chunkX, chunkY, chunkZ, chu
     });
   }
 
-  // "craters" (TODO: fill with water to make lakes)
-  if (random() < 0.20) {
-    var radius = ~~(random() * 10);
-    for (var dx = -radius; dx <= radius; ++dx) {
-      for (var dy = -radius; dy <= radius; ++dy) {
-        for (var dz = -radius; dz <= radius; ++dz) {
-          var distance = Math.sqrt(dx*dx + dy*dy + dz*dz); // TODO: better algorithm
-          if (distance < radius)
-            changes.push([[startX+dx, startY+dy, startZ+dz], 0]);
-        }
-      }
-    }
-  }
 
   return changes;
 };
