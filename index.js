@@ -14,16 +14,11 @@ function Land(game, opts) {
   this.game = game;
 
   if (!game.plugins || !game.plugins.get('voxel-registry')) throw 'voxel-land requires voxel-registry';
-  var registry = game.plugins.get('voxel-registry');
+  this.registry = game.plugins.get('voxel-registry');
 
   opts = opts || {};
   opts.seed = opts.seed || 'foo';
-  opts.materials = opts.materials || {  // TODO: how about getting directly instead of having this map here?
-    grass: registry.getBlockID('grass'),
-    dirt: registry.getBlockID('dirt'),
-    stone: registry.getBlockID('stone'),
-    bark: registry.getBlockID('logOak'),
-    leaves: registry.getBlockID('leavesOak')};
+  opts.materials = opts.materials || undefined;
 
   opts.crustLower = opts.crustLower === undefined ? 0 : opts.crustLower;
   opts.crustUpper = opts.crustUpper === undefined ? 2 : opts.crustUpper;
@@ -46,17 +41,44 @@ function Land(game, opts) {
 
   this.opts = opts;
 
-  this.worker = webworkify(require('./worker.js'));
-  
   this.enable();
 }
 
 Land.prototype.enable = function() {
+  this.registerBlocks();
+  this.worker = webworkify(require('./worker.js'));
   this.bindEvents();
 };
 
 Land.prototype.disable = function() {
   this.unbindEvents();
+  // TODO: unregister blocks?
+};
+
+Land.prototype.registerBlocks = function()  {
+  if (this.opts.materials) return; // only register blocks once TODO: remove after adding unregister
+
+  this.registry.registerBlock('grass', {texture: ['grass_top', 'dirt', 'grass_side'], hardness:5, itemDrop: 'dirt'});
+  this.registry.registerBlock('dirt', {texture: 'dirt', hardness:4});
+  this.registry.registerBlock('stone', {texture: 'stone', hardness:90, itemDrop: 'cobblestone'});
+  this.registry.registerBlock('logOak', {texture: ['log_oak_top', 'log_oak_top', 'log_oak'], hardness:8});
+  this.registry.registerBlock('cobblestone', {texture: 'cobblestone', hardness:80});
+  this.registry.registerBlock('oreCoal', {texture: 'coal_ore'});
+  this.registry.registerBlock('brick', {texture: 'brick'}); // some of the these blocks don't really belong here..do they?
+  this.registry.registerBlock('obsidian', {texture: 'obsidian', hardness: 900});
+  this.registry.registerBlock('leavesOak', {texture: 'leaves_oak_opaque', hardness: 2, itemDrop: null});
+  this.registry.registerBlock('glass', {texture: 'glass'});
+
+  this.registry.registerBlock('plankOak', {texture: 'planks_oak'});
+  this.registry.registerBlock('logBirch', {texture: ['log_birch_top', 'log_birch_top', 'log_birch'], hardness:8}); // TODO: generate
+
+  // for passing to worker
+  this.opts.materials = this.opts.materials || {
+    grass: this.registry.getBlockID('grass'),
+    dirt: this.registry.getBlockID('dirt'),
+    stone: this.registry.getBlockID('stone'),
+    bark: this.registry.getBlockID('logOak'),
+    leaves: this.registry.getBlockID('leavesOak')};
 };
 
 Land.prototype.bindEvents = function() {
