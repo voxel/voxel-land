@@ -58,7 +58,11 @@ Land.prototype.bindEvents = function() {
 
   self.worker.addEventListener('message', function(ev) {
     if (ev.data.cmd === 'chunkGenerated') {
-      var chunk = ev.data.chunk;
+      var voxels = new Uint8Array(ev.data.voxelBuffer);
+      var chunk = {
+        position: ev.data.position,
+        dims: [self.game.chunkSize, self.game.chunkSize, self.game.chunkSize],
+        voxels: voxels}; 
 
       self.game.showChunk(chunk);
     }

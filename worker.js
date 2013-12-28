@@ -96,7 +96,8 @@ ChunkGenerator.prototype.populateChunk = function(x, heightMap, z, voxels) {
 
 ChunkGenerator.prototype.generateChunk = function(pos) {
   var width = this.opts.chunkSize;
-  var voxels = new Int8Array(width * width * width);
+  var buffer = new ArrayBuffer(width * width * width * 1);
+  var voxels = new Uint8Array(buffer);
 
   /* to prove this code truly is running asynchronously
   var i=0;
@@ -141,13 +142,7 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
     }
   }
 
-  var chunk = {
-    position: pos,
-    dims: [this.opts.chunkSize, this.opts.chunkSize, this.opts.chunkSize],
-    voxels: voxels
-  }
-
-  this.worker.postMessage({cmd: 'chunkGenerated', chunk:chunk});
+  this.worker.postMessage({cmd: 'chunkGenerated', position: pos, voxelBuffer: buffer}, [buffer]);
 };
 
 module.exports = function() {
