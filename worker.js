@@ -26,7 +26,7 @@ ChunkGenerator.prototype.generateHeightMap = function(position, width) {
   var startX = position[0] * width;
   var startY = position[1] * width;
   var startZ = position[2] * width;
-  var heightMap = new Int8Array(width * width);
+  var heightMap = new Uint8Array(width * width);
 
   for (var x = startX; x < startX + width; x++) {
     for (var z = startZ; z < startZ + width; z++) {
@@ -96,8 +96,9 @@ ChunkGenerator.prototype.populateChunk = function(x, heightMap, z, voxels) {
 
 ChunkGenerator.prototype.generateChunk = function(pos) {
   var width = this.opts.chunkSize;
-  var buffer = new ArrayBuffer(width * width * width * 1);
-  var voxels = new Uint8Array(buffer);
+  var arrayType = {1:Uint8Array, 2:Uint16Array, 4:Uint32Array}[this.opts.arrayElementSize];
+  var buffer = new ArrayBuffer(width * width * width * this.opts.arrayElementSize);
+  var voxels = new arrayType(buffer);
 
   /* to prove this code truly is running asynchronously
   var i=0;

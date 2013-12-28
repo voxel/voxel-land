@@ -32,6 +32,16 @@ function Land(game, opts) {
   opts.populateTrees = (opts.populateTrees !== undefined) ? opts.populateTrees : true;
   opts.chunkSize = game.chunkSize || 32;
 
+  // can't clone types, so need to send size instead
+  if (game.arrayType === Uint8Array || game.arrayType === Uint8ClampedArray)
+    opts.arrayElementSize = 1;
+  else if (game.arrayType === Uint16Array)
+    opts.arrayElementSize = 2;
+  else if (game.arrayType === Uint32Array)
+    opts.arrayElementSize = 4;
+  else
+    throw 'voxel-land unknown game.arrayType: ' + game.arrayType
+
   this.opts = opts;
 
   this.worker = webworkify(require('./worker.js'));
@@ -58,7 +68,7 @@ Land.prototype.bindEvents = function() {
 
   self.worker.addEventListener('message', function(ev) {
     if (ev.data.cmd === 'chunkGenerated') {
-      var voxels = new Uint8Array(ev.data.voxelBuffer);
+      var voxels = new self.game.arrayType(ev.data.voxelBuffer);
       var chunk = {
         position: ev.data.position,
         dims: [self.game.chunkSize, self.game.chunkSize, self.game.chunkSize],
