@@ -58,40 +58,46 @@ function scale( x, fromLow, fromHigh, toLow, toHigh ) {
   return ( x - fromLow ) * ( toHigh - toLow ) / ( fromHigh - fromLow ) + toLow;
 }
 
-ChunkGenerator.prototype.populateChunk = function(x, heightMap, z, voxels) {
+// Add per-chunk features
+// Mutate voxels array
+ChunkGenerator.prototype.populateChunk = function(random, chunkX, chunkY, chunkZ, chunkHeightMap, voxels) {
+  // populate chunk with features that don't need to cross chunks TODO: customizable
+  // ores?
+};
+
+// Add possibly-cross-chunk features, with global world coordinates (slower)
+// Send message telling game to make given voxel changes
+ChunkGenerator.prototype.decorate = function(random, startX, startY, startZ, chunkHeightMap) {
+  var changes = [];
   var width = this.opts.chunkSize;
-
-  // populate chunk with trees TODO: customizable
-
   // TODO: populate later, so structures can cross chunks??
   if (this.opts.populateTrees) {
-    var n = this.noiseTrees.noise2D(x, z); // [-1,1]
+    var n = this.noiseTrees.noise2D(startX, startZ); // [-1,1]
 
-    if (n < 0) { // not all chunks have trees
+    //if (n < 0) { // not all chunks have trees
+    // start at center of chunk
+    var dx = width / 2;
+    var dz = width / 2;
 
-      // in middle of chunk for now (until can cross chunks)
-      var dx = width / 2;
-      var dz = width / 2;
+    // position at top of surface TODO: fix
+    var dy = chunkHeightMap[dx + dz * width] + 1;
 
-      // position at top of surface
-      var y = heightMap[dx + dz * width] + 1;
+    createTree({ 
+      random: random,
+      bark: this.opts.materials.bark,
+      leaves: this.opts.materials.leaves,
+      position: {x:startX - dx, y:startY - dy, z:startZ - dz},
+      treetype: 2,
+      setBlock: function (pos, value) {
+        changes.push([[pos.x, pos.y, pos.z], value]);
+        return false;  // returning true stops tree
+      }
+    });
 
-      var random = new Alea(x*z);
-
-      createTree({ 
-        random: random,
-        bark: this.opts.materials.bark,
-        leaves: this.opts.materials.leaves,
-        position: {x:dx, y:y, z:dz},
-        treetype: 1,
-        setBlock: function (pos, value) {
-          var idx = pos.x + pos.y * width + pos.z * width * width;
-          voxels[idx] = value;
-          return false;  // returning true stops tree
-        }
-      });
-    }
+    //console.log('changes='+startX+','+startY+','+startZ);
+    //console.log(JSON.stringify(changes));
   }
+  this.worker.postMessage({cmd: 'decorate', changes:changes}); // TODO: use transferrable?
 };
 
 ChunkGenerator.prototype.generateChunk = function(pos) {
@@ -132,7 +138,9 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
       }
     }
     // features
-    this.populateChunk(pos[0], heightMap, pos[2], voxels);
+    var random = new Alea(pos[0] * pos[1] * pos[2]); // TODO: sufficient?
+    this.populateChunk(random, pos[0], pos[1], pos[2], heightMap, voxels);
+    this.decorate(random, pos[0]*width, pos[1]*width, pos[2]*width, heightMap);
   } else if (pos[1] > 0) {
     // empty space above ground
   } else {

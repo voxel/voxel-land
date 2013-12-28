@@ -75,6 +75,15 @@ Land.prototype.bindEvents = function() {
         voxels: voxels}; 
 
       self.game.showChunk(chunk);
+    } else if (ev.data.cmd === 'decorate') {
+      var changes = ev.data.changes;
+      for (var i = 0; i < changes.length; ++i) {
+        var pos = changes[i][0];
+        var value = changes[i][1];
+
+        //console.log('set',pos,value);
+        self.game.setBlock(pos, value); // TODO: faster mass edit?
+      }
     }
   });
 };
