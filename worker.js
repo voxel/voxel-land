@@ -66,27 +66,32 @@ ChunkGenerator.prototype.populateChunk = function(random, chunkX, chunkY, chunkZ
 };
 
 // Add possibly-cross-chunk features, with global world coordinates (slower)
-// Send message telling game to make given voxel changes
-ChunkGenerator.prototype.decorate = function(random, startX, startY, startZ, chunkHeightMap) {
+// Return list of changes to voxels to make
+ChunkGenerator.prototype.decorate = function(random, chunkX, chunkY, chunkZ, chunkHeightMap) {
   var changes = [];
   var width = this.opts.chunkSize;
-  // TODO: populate later, so structures can cross chunks??
+  var startX = chunkX * width;
+  var startY = chunkY * width;
+  var startZ = chunkZ * width;
+
   if (this.opts.populateTrees) {
-    var n = this.noiseTrees.noise2D(startX, startZ); // [-1,1]
+    var n = this.noiseTrees.noise2D(chunkX, chunkZ); // [-1,1]
 
     //if (n < 0) { // not all chunks have trees
     // start at center of chunk
     var dx = width / 2;
     var dz = width / 2;
 
-    // position at top of surface TODO: fix
+    // position at top of surface 
     var dy = chunkHeightMap[dx + dz * width] + 1;
+
+    console.log(dy+' '+startY);
 
     createTree({ 
       random: random,
       bark: this.opts.materials.bark,
       leaves: this.opts.materials.leaves,
-      position: {x:startX - dx, y:startY - dy, z:startZ - dz},
+      position: {x:startX + dx, y:startY + dy, z:startZ + dz},
       treetype: 2,
       setBlock: function (pos, value) {
         changes.push([[pos.x, pos.y, pos.z], value]);
@@ -97,7 +102,8 @@ ChunkGenerator.prototype.decorate = function(random, startX, startY, startZ, chu
     //console.log('changes='+startX+','+startY+','+startZ);
     //console.log(JSON.stringify(changes));
   }
-  this.worker.postMessage({cmd: 'decorate', changes:changes}); // TODO: use transferrable?
+
+  return changes;
 };
 
 ChunkGenerator.prototype.generateChunk = function(pos) {
@@ -105,6 +111,7 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
   var arrayType = {1:Uint8Array, 2:Uint16Array, 4:Uint32Array}[this.opts.arrayElementSize];
   var buffer = new ArrayBuffer(width * width * width * this.opts.arrayElementSize);
   var voxels = new arrayType(buffer);
+  var changes = undefined;
 
   /* to prove this code truly is running asynchronously
   var i=0;
@@ -140,7 +147,7 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
     // features
     var random = new Alea(pos[0] * pos[1] * pos[2]); // TODO: sufficient?
     this.populateChunk(random, pos[0], pos[1], pos[2], heightMap, voxels);
-    this.decorate(random, pos[0]*width, pos[1]*width, pos[2]*width, heightMap);
+    changes = this.decorate(random, pos[0], pos[1], pos[2], heightMap);
   } else if (pos[1] > 0) {
     // empty space above ground
   } else {
@@ -152,6 +159,7 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
   }
 
   this.worker.postMessage({cmd: 'chunkGenerated', position: pos, voxelBuffer: buffer}, [buffer]);
+  if (changes) this.worker.postMessage({cmd: 'decorate', changes:changes}); // TODO: use transferrable?
 };
 
 module.exports = function() {
