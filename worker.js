@@ -74,33 +74,41 @@ ChunkGenerator.prototype.decorate = function(random, chunkX, chunkY, chunkZ, chu
   var startY = chunkY * width;
   var startZ = chunkZ * width;
 
-  if (this.opts.populateTrees) {
-    var n = this.noiseTrees.noise2D(chunkX, chunkZ); // [-1,1]
+  // TODO: iterate list of 'decorators'
+  if (!this.opts.populateTrees) 
+    return;
 
-    //if (n < 0) { // not all chunks have trees
-    // start at center of chunk
-    var dx = width / 2;
-    var dz = width / 2;
+  // TODO: large-scale biomes, with higher tree density? forests
+  var treeCount = ~~scale(this.noiseTrees.noise2D(chunkX / this.opts.treesScale, chunkZ / this.opts.treesScale), -1, 1, 0, this.opts.treesMaxDensity);
+
+  for (var i = 0; i < treeCount; ++i) {
+    // scatter randomly around chunk
+    var dx = ~~scale(random(), 0, 1, 0, width - 1);
+    var dz = ~~scale(random(), 0, 1, 0, width - 1);
 
     // position at top of surface 
     var dy = chunkHeightMap[dx + dz * width] + 1;
 
-    console.log(dy+' '+startY);
+    var n = random();
+    var treeType;
+    if (n < 0.05)
+      treeType = 'guybrush';
+    //else if (n < 0.20)
+    //  treeType = 'fractal';  // too weird
+    else
+      treeType = 'subspace';
 
     createTree({ 
       random: random,
       bark: this.opts.materials.bark,
       leaves: this.opts.materials.leaves,
       position: {x:startX + dx, y:startY + dy, z:startZ + dz},
-      treetype: 2,
+      treeType: treeType,
       setBlock: function (pos, value) {
         changes.push([[pos.x, pos.y, pos.z], value]);
         return false;  // returning true stops tree
       }
     });
-
-    //console.log('changes='+startX+','+startY+','+startZ);
-    //console.log(JSON.stringify(changes));
   }
 
   return changes;
@@ -145,7 +153,7 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
       }
     }
     // features
-    var random = new Alea(pos[0] * pos[1] * pos[2]); // TODO: sufficient?
+    var random = new Alea(pos[0] + pos[1] * width + pos[2] * width * width); // TODO: sufficient?
     this.populateChunk(random, pos[0], pos[1], pos[2], heightMap, voxels);
     changes = this.decorate(random, pos[0], pos[1], pos[2], heightMap);
   } else if (pos[1] > 0) {

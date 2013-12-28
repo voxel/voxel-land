@@ -30,6 +30,8 @@ function Land(game, opts) {
   opts.hillScale = opts.hillScale || 20;
   opts.roughnessScale = opts.roughnessScale || 200;
   opts.populateTrees = (opts.populateTrees !== undefined) ? opts.populateTrees : true;
+  opts.treesScale = opts.treesScale || 200;
+  opts.treesMaxDensity = (opts.treesMaxDensity !== undefined) ? opts.treesMaxDensity : 5;
   opts.chunkSize = game.chunkSize || 32;
 
   // can't clone types, so need to send size instead
@@ -83,6 +85,7 @@ Land.prototype.bindEvents = function() {
 
         //console.log('set',pos,value);
         self.game.setBlock(pos, value); // TODO: faster mass edit?
+        // TODO: what if pos is out of loaded chunk range? doesn't automatically load chunk; change will be lost
       }
     }
   });
