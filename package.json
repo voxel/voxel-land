@@ -13,7 +13,7 @@
   ],
   "dependencies": {
     "voxel-trees": "~0.1.0",
-    "simplex-noise": "git://github.com/deathcap/simplex-noise.js.git#05cb53318ca0fd0f4ea1aecafcb2892dfe2689c0",
+    "simplex-noise": "git://github.com/deathcap/simplex-noise.js.git#f5561831882195aaa3a076fbf993b37bc0bc5350",
     "alea": "0.0.9",
     "webworkify": "~0.1.0",
     "ever": "0.0.3"
