@@ -61,12 +61,12 @@ Land.prototype.registerBlocks = function()  {
   this.registry.registerBlock('grass', {texture: ['grass_top', 'dirt', 'grass_side'], hardness:5, itemDrop: 'dirt'});
   this.registry.registerBlock('dirt', {texture: 'dirt', hardness:4});
   this.registry.registerBlock('stone', {texture: 'stone', hardness:90, itemDrop: 'cobblestone'});
-  this.registry.registerBlock('logOak', {texture: ['log_oak_top', 'log_oak_top', 'log_oak'], hardness:8});
+  this.registry.registerBlock('logOak', {displayName: 'Oak Wood', texture: ['log_oak_top', 'log_oak_top', 'log_oak'], hardness:8});
   this.registry.registerBlock('cobblestone', {texture: 'cobblestone', hardness:80});
-  this.registry.registerBlock('oreCoal', {texture: 'coal_ore'});
+  this.registry.registerBlock('oreCoal', {displayName: 'Coal Ore', texture: 'coal_ore'});
   this.registry.registerBlock('brick', {texture: 'brick'}); // some of the these blocks don't really belong here..do they?
   this.registry.registerBlock('obsidian', {texture: 'obsidian', hardness: 900});
-  this.registry.registerBlock('leavesOak', {texture: 'leaves_oak_opaque', hardness: 2, itemDrop: null});
+  this.registry.registerBlock('leavesOak', {displayName: 'Oak Leaves', texture: 'leaves_oak_opaque', hardness: 2, itemDrop: null});
   this.registry.registerBlock('glass', {texture: 'glass'});
 
   this.registry.registerBlock('logBirch', {texture: ['log_birch_top', 'log_birch_top', 'log_birch'], hardness:8}); // TODO: generate
