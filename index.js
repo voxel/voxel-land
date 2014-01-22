@@ -1,6 +1,7 @@
 // # vim: set shiftwidth=2 tabstop=2 softtabstop=2 expandtab:
 
 var webworkify = require('webworkify');
+var unworkify = require('unworkify')
 
 module.exports = function(game, opts) {
   return new Land(game, opts);
@@ -46,7 +47,13 @@ function Land(game, opts) {
 
 Land.prototype.enable = function() {
   this.registerBlocks();
-  this.worker = webworkify(require('./worker.js'));
+  if (process.browser) {
+    this.worker = webworkify(require('./worker.js'));
+  } else {
+    // fallback to unthreaded 
+    // TODO: switch to https://github.com/audreyt/node-webworker-threads
+    this.worker = unworkify(require('./worker.js'));
+  }
   this.bindEvents();
 };
 

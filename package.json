@@ -16,6 +16,7 @@
     "simplex-noise": "git://github.com/deathcap/simplex-noise.js.git#eba7c7e7599ef58ac5d7eef7ee81eb2505aac56c",
     "alea": "0.0.9",
     "webworkify": "~0.1.0",
+    "unworkify": "git://github.com/deathcap/unworkify.git#31f62e3536ecb0f53f864e3073f5ce1d565174c7",
     "ever": "0.0.3"
   },
   "peerDependencies": {
