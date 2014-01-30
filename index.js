@@ -40,7 +40,7 @@ function Land(game, opts) {
   else
     throw 'voxel-land unknown game.arrayType: ' + game.arrayType
 
-  this.opts = opts;
+  this.opts = JSON.parse(JSON.stringify(opts));
 
   this.enable();
 }
