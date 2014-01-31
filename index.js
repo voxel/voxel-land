@@ -8,7 +8,7 @@ module.exports = function(game, opts) {
 };
 
 module.exports.pluginInfo = {
-  loadAfter: ['voxel-registry', 'craftingrecipes']
+  loadAfter: ['voxel-registry', 'voxel-recipes']
 };
 
 function Land(game, opts) {
@@ -78,7 +78,7 @@ Land.prototype.registerBlocks = function()  {
 
   this.registry.registerBlock('logBirch', {texture: ['log_birch_top', 'log_birch_top', 'log_birch'], hardness:8}); // TODO: generate
 
-  var recipes = this.game.plugins.get('craftingrecipes');
+  var recipes = this.game.plugins.get('voxel-recipes');
   if (recipes) { // TODO: should these be properties on voxel-registry, instead?
     recipes.thesaurus.registerName('wood.log', 'logOak');
     recipes.thesaurus.registerName('wood.log', 'logBirch');
