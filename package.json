@@ -23,5 +23,16 @@
     "voxel-plugins": ">=0.1.0",
     "voxel-engine": ">=0.19.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "readme": "# voxel-land\n\nA terrain generator combining several landform features. Grass, dirt, stone, trees.\n\nTrees are provided by [voxel-forest](https://github.com/deathcap/voxel-forest),\nand the overall grass surface by Perlin noise (similar to [voxel-perlin-terrain](https://github.com/maxogden/voxel-perlin-terrain):\n\n![screenshot](http://i.imgur.com/ZzVFUAj.png \"Screenshot overview\")\n\nBeneath the grass is dirt, and then all chunks below are stone:\n\n![screenshot](http://i.imgur.com/D918dUX.png \"Screenshot both\")\n\n![screenshot](http://i.imgur.com/XB8k8XP.png \"Screenshot mined\")\n\n## Usage\n\n    var createLand = require('voxel-land');\n    var land = createLand(game, opts);\n    land.enable();\n\nor with [voxel-plugins](https://github.com/deathcap/voxel-plugins):\n\n    plugins.load('land', opts);\n\nThe voxel-engine game options should have `generateChunks: false`. voxel-land\nwill listen on `game.voxel` for the `missingChunk` event and generate the new\nchunks. The listener can be unregistered with `land.disable()`.\n\n## License\n\nMIT\n\n",
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/deathcap/voxel-land/issues"
+  },
+  "_id": "voxel-land@0.1.0",
+  "dist": {
+    "shasum": "68bb321a10870539aa5e6ca1786431898a0edcd5"
+  },
+  "_resolved": "git://github.com/greenlion/voxel-land.git#d89ede49072ab65b6ae3bd9136880db51ed035df",
+  "_from": "voxel-land@git://github.com/greenlion/voxel-land.git"
 }

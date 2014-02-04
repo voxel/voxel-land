@@ -16,6 +16,8 @@ function ChunkGenerator(worker, opts) {
   this.noiseHills = new SimplexNoise(function() { return randomHills(); });
   this.noiseRoughness = new SimplexNoise(function() { return randomRoughness(); });
   this.noiseTrees = new SimplexNoise(function() { return randomTrees(); });
+  
+  this.heightMaps = []
 
   return this;
 };
@@ -139,34 +141,48 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
   var voxels = new arrayType(buffer);
   var changes = undefined;
 
-  /* to prove this code truly is running asynchronously
-  var i=0;
-  console.log('lag');
-  while(i<1000000000)
-    i++;
-  console.log('lag done');
-  */
-
-  /* to generate only specific chunks for testing
-  var cstr = pos[0] + ',' + pos[2];
-  var okc = [ 
-"-1,-1",
-"0,0"];
-  if (okc.indexOf(cstr) == -1) return;
-  */
-
-  if (pos[1] === 0) {
-    // ground surface level
+  var mapid = pos[0] + ':' + pos[2];
+  if(typeof this.heightMaps[mapid] == 'undefined') {
+    var min = 99999;
+    var max = -99999;
     var heightMap = this.generateHeightMap(pos, width);
+    for(var i=0;i<width*width;++i) {
+      if(heightMap[i] < min) min = heightMap[i];
+      if(heightMap[i] > max) max = heightMap[i];
+    }
+
+    // min and max are in chunks
+    min = Math.floor(min/32);
+    max = Math.floor(max/32);
+    this.heightMaps[mapid] = { heightMap:heightMap, min:min, max:max }
+
+  } else {
+    min = this.heightMaps[mapid].min;
+    max = this.heightMaps[mapid].max;
+    var heightMap = this.heightMaps[mapid].heightMap;
+  }
+
+  if (pos[1] >= min && pos[1] <= max) {
+    // ground level
 
     for (var x = 0; x < width; ++x) {
       for (var z = 0; z < width; ++z) {
         var y = heightMap[x + z * width];
+        var forceStone = 0
+        if(y>width) {
+          forceStone = 1
+          y=width
+        }
+        var height = y
 
         // dirt with grass on top
-        voxels[x + y * width + z * width * width] = this.opts.materials.grass;
-        while(y-- > 0)
-          voxels[x + y * width + z * width * width] = this.opts.materials.dirt;
+        voxels[x + y * width + z * width * width] = forceStone ? this.opts.materials.stone : this.opts.materials.grass;
+        // 10 voxels or so of dirt (could be less if this voxel is near the bottom of a chunk with y > 0)
+        while(y-- > (height - 10) && y > 0 )
+          voxels[x + y * width + z * width * width] = forceStone ? this.opts.materials.stone : this.opts.materials.dirt;
+        // stone under dirt
+        while(y-- > 0 )
+          voxels[x + y * width + z * width * width] = this.opts.materials.stone 
 
       }
     }
