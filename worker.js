@@ -195,7 +195,7 @@ module.exports = function() {
     if (ev.data.cmd === 'configure') {
       gen = new ChunkGenerator(this, ev.data.opts);
     } else if (ev.data.cmd === 'generateChunk') {
-      if (gen === undefined) throw "voxel-land web worker error: received 'generateChunk' before 'configure'";
+      if (gen === undefined) throw new Error('voxel-land web worker error: received "generateChunk" before "configure"');
       gen.generateChunk(ev.data.pos);
     }
   });

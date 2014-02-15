@@ -1,4 +1,3 @@
-// # vim: set shiftwidth=2 tabstop=2 softtabstop=2 expandtab:
 
 var webworkify = require('webworkify');
 var unworkify = require('unworkify')
@@ -14,7 +13,7 @@ module.exports.pluginInfo = {
 function Land(game, opts) {
   this.game = game;
 
-  if (!game.plugins || !game.plugins.get('voxel-registry')) throw 'voxel-land requires voxel-registry';
+  if (!game.plugins || !game.plugins.get('voxel-registry')) throw new Error('voxel-land requires voxel-registry');
   this.registry = game.plugins.get('voxel-registry');
 
   opts = opts || {};
@@ -38,7 +37,7 @@ function Land(game, opts) {
   else if (game.arrayType === Uint32Array)
     opts.arrayElementSize = 4;
   else
-    throw 'voxel-land unknown game.arrayType: ' + game.arrayType
+    throw new Error('voxel-land unknown game.arrayType: ' + game.arrayType)
 
   this.opts = JSON.parse(JSON.stringify(opts));
 
