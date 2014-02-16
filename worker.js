@@ -79,8 +79,8 @@ ChunkGenerator.prototype.populateChunk = function(random, chunkX, chunkY, chunkZ
     voxels[x + y * width + z * width * width] = value;
   };
 
-  var clustersPerChunk = 10;
-  var clusterSize = 5;
+  var clustersPerChunk = 30;
+  var clusterSize = nextInt(100) + 50;
 
   for (var i = 0; i < clustersPerChunk; i += 1) {
     var x = nextInt(width - 1);
@@ -91,7 +91,7 @@ ChunkGenerator.prototype.populateChunk = function(random, chunkX, chunkY, chunkZ
     for (var j = 0; j < clusterSize; j += 1) {
       if (getBlock(x, y, z) === this.opts.materials.stone) {
         setBlock(x, y, z, this.opts.materials.oreCoal);
-        console.log('ore gen at '+[chunkX * width + x, chunkY * width + y, chunkZ * width + z].join(' '));
+        //console.log('ore gen at '+[chunkX * width + x, chunkY * width + y, chunkZ * width + z].join(' '));
       }
 
       // TODO: better clusters, and other distributions - see http://www.minecraftforum.net/topic/1107057-146v2-custom-ore-generation-updated-jan-5th/ 
