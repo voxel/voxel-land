@@ -17,6 +17,10 @@ function ChunkGenerator(worker, opts) {
   this.noiseRoughness = new SimplexNoise(function() { return randomRoughness(); });
   this.noiseTrees = new SimplexNoise(function() { return randomTrees(); });
 
+  this.populators = [];
+
+  this.registerPopulator(this.populateCoalOre.bind(this));
+
   return this;
 };
 
@@ -58,12 +62,25 @@ function scale( x, fromLow, fromHigh, toLow, toHigh ) {
   return ( x - fromLow ) * ( toHigh - toLow ) / ( fromHigh - fromLow ) + toLow;
 }
 
+ChunkGenerator.prototype.registerPopulator = function(f) {
+  this.populators.push(f);
+};
+
+
 // Add per-chunk features
 // Mutate voxels array
 ChunkGenerator.prototype.populateChunk = function(random, chunkX, chunkY, chunkZ, chunkHeightMap, voxels) {
   // populate chunk with features that don't need to cross chunks TODO: customizable, plugin-based
   console.log('populating chunk'+[chunkX,chunkY,chunkZ,voxels].join(' '));
 
+  for (var i = 0; i < this.populators.length; i += 1) {
+    var populate = this.populators[i];
+
+    populate(random, chunkX, chunkY, chunkZ, chunkHeightMap, voxels);
+  }
+};
+
+ChunkGenerator.prototype.populateOreClusters = function(random, chunkX, chunkY, chunkZ, chunkHeightMap, voxels, clustersPerChunk, clusterSize, replaceMaterial, oreMaterial) {
   // ores
   var width = this.opts.chunkSize;
   var nextInt = function(max) {
@@ -107,6 +124,18 @@ ChunkGenerator.prototype.populateChunk = function(random, chunkX, chunkY, chunkZ
       y %= width - 1;
     }
   }
+};
+
+ChunkGenerator.prototype.populateCoalOre = function(random, chunkX, chunkY, chunkZ, chunkHeightMap, voxels) {
+  var nextInt = function(max) {
+    return Math.round(random() * max);
+  };
+
+  var clustersPerChunk = 30;
+  var clusterSize = nextInt(100) + 50;
+  var replaceMaterial = this.opts.materials.stone;
+
+  this.populateOreClusters(random, chunkX, chunkY, chunkZ, chunkHeightMap, voxels, clustersPerChunk, clusterSize, replaceMaterial, replaceMaterial, this.opts.materials.oreCoal);
 };
 
 // Add possibly-cross-chunk features, with global world coordinates (slower)
