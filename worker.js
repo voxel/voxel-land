@@ -80,19 +80,31 @@ ChunkGenerator.prototype.populateChunk = function(random, chunkX, chunkY, chunkZ
   };
 
   var clustersPerChunk = 10;
+  var clusterSize = 5;
 
   for (var i = 0; i < clustersPerChunk; i += 1) {
-    var x = chunkX + nextInt(width - 1);
-    var y = chunkY + nextInt(width - 1);
-    var z = chunkZ + nextInt(width - 1);
+    var x = nextInt(width - 1);
+    var y = nextInt(width - 1);
+    var z = nextInt(width - 1);
 
     // replace stone with ore
-    if (getBlock(x, y, z) === this.opts.materials.stone) {
-      setBlock(x, y, z, this.opts.materials.oreCoal);
-      console.log('ore gen at '+[x,y,z].join(' '));
+    for (var j = 0; j < clusterSize; j += 1) {
+      if (getBlock(x, y, z) === this.opts.materials.stone) {
+        setBlock(x, y, z, this.opts.materials.oreCoal);
+        console.log('ore gen at '+[chunkX * width + x, chunkY * width + y, chunkZ * width + z].join(' '));
+      }
 
-      // TODO: clusters, and other distributions - see http://www.minecraftforum.net/topic/1107057-146v2-custom-ore-generation-updated-jan-5th/ 
-      // and http://customoregen.shoutwiki.com/wiki/Category:Distributions
+      // TODO: better clusters, and other distributions - see http://www.minecraftforum.net/topic/1107057-146v2-custom-ore-generation-updated-jan-5th/ 
+      // and http://customoregen.shoutwiki.com/wiki/Category:Distributions http://www.minecraftforge.net/wiki/Tutorials/Ore_Generation
+      // 'elliptic?'
+     
+      // currently, diagonal
+      x += 1;
+      y += 1;
+
+      // wrap TODO: truncate instead?
+      x %= width - 1;
+      y %= width - 1;
     }
   }
 };
@@ -210,7 +222,7 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
     // empty space above ground
     // TODO: clouds, other above-ground floating structures? https://github.com/deathcap/voxel-land/issues/6
   } else {
-    //this.opts.materials.stone=0; // debug
+    this.opts.materials.stone=0; // debug
     // below ground
     for (var i = 0; i < width * width * width; ++i) {
       voxels[i] = this.opts.materials.stone;
