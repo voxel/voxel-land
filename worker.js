@@ -97,10 +97,10 @@ ChunkGenerator.prototype.populateChunk = function(random, chunkX, chunkY, chunkZ
       // TODO: better clusters, and other distributions - see http://www.minecraftforum.net/topic/1107057-146v2-custom-ore-generation-updated-jan-5th/ 
       // and http://customoregen.shoutwiki.com/wiki/Category:Distributions http://www.minecraftforge.net/wiki/Tutorials/Ore_Generation
       // 'elliptic?'
-     
-      // currently, diagonal
-      x += 1;
-      y += 1;
+   
+      // currently, randomly branches, but might loop on itself
+      x += nextInt(2) - 1
+      y += nextInt(2) - 1
 
       // wrap TODO: truncate instead?
       x %= width - 1;
@@ -222,7 +222,7 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
     // empty space above ground
     // TODO: clouds, other above-ground floating structures? https://github.com/deathcap/voxel-land/issues/6
   } else {
-    this.opts.materials.stone=0; // debug
+    //this.opts.materials.stone=0; // debug
     // below ground
     for (var i = 0; i < width * width * width; ++i) {
       voxels[i] = this.opts.materials.stone;
