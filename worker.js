@@ -61,8 +61,40 @@ function scale( x, fromLow, fromHigh, toLow, toHigh ) {
 // Add per-chunk features
 // Mutate voxels array
 ChunkGenerator.prototype.populateChunk = function(random, chunkX, chunkY, chunkZ, chunkHeightMap, voxels) {
-  // populate chunk with features that don't need to cross chunks TODO: customizable
-  // ores?
+  // populate chunk with features that don't need to cross chunks TODO: customizable, plugin-based
+  console.log('populating chunk'+[chunkX,chunkY,chunkZ,voxels].join(' '));
+
+  // ores
+  var width = this.opts.chunkSize;
+  var nextInt = function(max) {
+    return Math.round(random() * max);
+  };
+
+  // TODO: how about using ndarray
+  var getBlock = function(x, y, z) {
+    return voxels[x + y * width + z * width * width];
+  }
+
+  var setBlock = function(x, y, z, value) {
+    voxels[x + y * width + z * width * width] = value;
+  };
+
+  var clustersPerChunk = 10;
+
+  for (var i = 0; i < clustersPerChunk; i += 1) {
+    var x = chunkX + nextInt(width - 1);
+    var y = chunkY + nextInt(width - 1);
+    var z = chunkZ + nextInt(width - 1);
+
+    // replace stone with ore
+    if (getBlock(x, y, z) === this.opts.materials.stone) {
+      setBlock(x, y, z, this.opts.materials.oreCoal);
+      console.log('ore gen at '+[x,y,z].join(' '));
+
+      // TODO: clusters, and other distributions - see http://www.minecraftforum.net/topic/1107057-146v2-custom-ore-generation-updated-jan-5th/ 
+      // and http://customoregen.shoutwiki.com/wiki/Category:Distributions
+    }
+  }
 };
 
 // Add possibly-cross-chunk features, with global world coordinates (slower)
@@ -176,12 +208,15 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
     changes = this.decorate(random, pos[0], pos[1], pos[2], heightMap); // TODO: should run in another worker, to not block terrain gen?
   } else if (pos[1] > 0) {
     // empty space above ground
+    // TODO: clouds, other above-ground floating structures? https://github.com/deathcap/voxel-land/issues/6
   } else {
+    //this.opts.materials.stone=0; // debug
     // below ground
-    // TODO: ores
     for (var i = 0; i < width * width * width; ++i) {
       voxels[i] = this.opts.materials.stone;
     }
+    var random = new Alea(pos[0] + pos[1] * width + pos[2] * width * width); // TODO: refactor with above
+    this.populateChunk(random, pos[0], pos[1], pos[2], null, voxels);
   }
 
   this.worker.postMessage({cmd: 'chunkGenerated', position: pos, voxelBuffer: buffer}, [buffer]);

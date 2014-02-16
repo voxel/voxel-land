@@ -85,12 +85,15 @@ Land.prototype.registerBlocks = function()  {
   }
 
   // for passing to worker
+  // TODO: pass all
   this.opts.materials = this.opts.materials || {
     grass: this.registry.getBlockID('grass'),
     dirt: this.registry.getBlockID('dirt'),
     stone: this.registry.getBlockID('stone'),
     bark: this.registry.getBlockID('logOak'),
-    leaves: this.registry.getBlockID('leavesOak')};
+    leaves: this.registry.getBlockID('leavesOak'),
+    oreCoal: this.registry.getBlockID('oreCoal')
+  };
 };
 
 Land.prototype.bindEvents = function() {
