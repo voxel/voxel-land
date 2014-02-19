@@ -69,6 +69,7 @@ Land.prototype.registerBlocks = function()  {
   if (this.opts.materials) return; // only register blocks once TODO: remove after adding unregister
 
   if (this.opts.registerItems) {
+    this.registry.registerItem('coal', {itemTexture: 'i/coal'})
   }
 
   if (this.opts.registerBlocks) {
@@ -77,7 +78,7 @@ Land.prototype.registerBlocks = function()  {
     this.registry.registerBlock('stone', {texture: 'stone', hardness:90, itemDrop: 'cobblestone'});
     this.registry.registerBlock('logOak', {displayName: 'Oak Wood', texture: ['log_oak_top', 'log_oak_top', 'log_oak'], hardness:8});
     this.registry.registerBlock('cobblestone', {texture: 'cobblestone', hardness:80});
-    this.registry.registerBlock('oreCoal', {displayName: 'Coal Ore', texture: 'coal_ore'});
+    this.registry.registerBlock('oreCoal', {displayName: 'Coal Ore', texture: 'coal_ore', itemDrop: 'coal'});
     this.registry.registerBlock('brick', {texture: 'brick'}); // some of the these blocks don't really belong here..do they?
     this.registry.registerBlock('obsidian', {texture: 'obsidian', hardness: 900});
     this.registry.registerBlock('leavesOak', {displayName: 'Oak Leaves', texture: 'leaves_oak_opaque', hardness: 2, itemDrop: null});
