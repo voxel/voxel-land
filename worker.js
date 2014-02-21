@@ -19,7 +19,9 @@ function ChunkGenerator(worker, opts) {
 
   this.populators = [];
 
+  // TODO: maybe run ore loops once, _then_ choose ore type? for efficiency
   this.registerPopulator(this.populateCoalOre.bind(this));
+  this.registerPopulator(this.populateIronOre.bind(this));
 
   return this;
 };
@@ -71,7 +73,7 @@ ChunkGenerator.prototype.registerPopulator = function(f) {
 // Mutate voxels array
 ChunkGenerator.prototype.populateChunk = function(random, chunkX, chunkY, chunkZ, chunkHeightMap, voxels) {
   // populate chunk with features that don't need to cross chunks TODO: customizable, plugin-based
-  console.log('populating chunk'+[chunkX,chunkY,chunkZ,voxels].join(' '));
+  console.log('populating chunk '+[chunkX,chunkY,chunkZ,voxels].join(' '));
 
   for (var i = 0; i < this.populators.length; i += 1) {
     var populate = this.populators[i];
@@ -106,8 +108,8 @@ ChunkGenerator.prototype.populateOreClusters = function(random, chunkX, chunkY, 
 
     // replace stone with ore
     for (var j = 0; j < clusterSize; j += 1) {
-      if (getBlock(x, y, z) === this.opts.materials.stone) {
-        setBlock(x, y, z, this.opts.materials.oreCoal);
+      if (getBlock(x, y, z) === replaceMaterial) {
+        setBlock(x, y, z, oreMaterial);
         //console.log('ore gen at '+[chunkX * width + x, chunkY * width + y, chunkZ * width + z].join(' '));
       }
 
@@ -126,6 +128,8 @@ ChunkGenerator.prototype.populateOreClusters = function(random, chunkX, chunkY, 
   }
 };
 
+// TODO: refactor, and make more generic enough that external plugins can register
+
 ChunkGenerator.prototype.populateCoalOre = function(random, chunkX, chunkY, chunkZ, chunkHeightMap, voxels) {
   var nextInt = function(max) {
     return Math.round(random() * max);
@@ -135,8 +139,21 @@ ChunkGenerator.prototype.populateCoalOre = function(random, chunkX, chunkY, chun
   var clusterSize = nextInt(100) + 50;
   var replaceMaterial = this.opts.materials.stone;
 
-  this.populateOreClusters(random, chunkX, chunkY, chunkZ, chunkHeightMap, voxels, clustersPerChunk, clusterSize, replaceMaterial, replaceMaterial, this.opts.materials.oreCoal);
+  this.populateOreClusters(random, chunkX, chunkY, chunkZ, chunkHeightMap, voxels, clustersPerChunk, clusterSize, replaceMaterial, this.opts.materials.oreCoal);
 };
+
+ChunkGenerator.prototype.populateIronOre = function(random, chunkX, chunkY, chunkZ, chunkHeightMap, voxels) {
+  var nextInt = function(max) {
+    return Math.round(random() * max);
+  };
+
+  var clustersPerChunk = 20;
+  var clusterSize = nextInt(30) + 10;
+  var replaceMaterial = this.opts.materials.stone;
+
+  this.populateOreClusters(random, chunkX, chunkY, chunkZ, chunkHeightMap, voxels, clustersPerChunk, clusterSize, replaceMaterial, this.opts.materials.oreIron);
+};
+
 
 // Add possibly-cross-chunk features, with global world coordinates (slower)
 // Return list of changes to voxels to make
@@ -251,7 +268,7 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
     // empty space above ground
     // TODO: clouds, other above-ground floating structures? https://github.com/deathcap/voxel-land/issues/6
   } else {
-    //this.opts.materials.stone=0; // debug
+    //this.opts.materials.stone=0; // debug ore gen
     // below ground
     for (var i = 0; i < width * width * width; ++i) {
       voxels[i] = this.opts.materials.stone;
