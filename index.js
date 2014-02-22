@@ -69,7 +69,7 @@ Land.prototype.registerBlocks = function()  {
   if (this.opts.materials) return; // only register blocks once TODO: remove after adding unregister
 
   if (this.opts.registerItems) {
-    this.registry.registerItem('coal', {itemTexture: 'i/coal'})
+    this.registry.registerItem('coal', {itemTexture: 'i/coal', fuelBurnTime: 1})
   }
 
   if (this.opts.registerBlocks) {
