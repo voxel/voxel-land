@@ -19,9 +19,5 @@
     "unworkify": "git://github.com/deathcap/unworkify.git#31f62e3536ecb0f53f864e3073f5ce1d565174c7",
     "ever": "0.0.3"
   },
-  "peerDependencies": {
-    "voxel-plugins": ">=0.1.0",
-    "voxel-engine": ">=0.19.0"
-  },
   "license": "MIT"
 }
