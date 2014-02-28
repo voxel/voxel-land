@@ -73,7 +73,7 @@ ChunkGenerator.prototype.registerPopulator = function(f) {
 // Mutate voxels array
 ChunkGenerator.prototype.populateChunk = function(random, chunkX, chunkY, chunkZ, chunkHeightMap, voxels) {
   // populate chunk with features that don't need to cross chunks TODO: customizable, plugin-based
-  console.log('populating chunk '+[chunkX,chunkY,chunkZ,voxels].join(' '));
+  //console.log('populating chunk '+[chunkX,chunkY,chunkZ,voxels].join(' '));
 
   for (var i = 0; i < this.populators.length; i += 1) {
     var populate = this.populators[i];
