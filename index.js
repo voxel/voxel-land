@@ -87,7 +87,7 @@ Land.prototype.registerBlocks = function()  {
       itemDrop: this.registry.getItemProps('apple') ? 'apple' : null});
     this.registry.registerBlock('glass', {texture: 'glass'});
 
-    this.registry.registerBlock('logBirch', {texture: ['log_birch_top', 'log_birch_top', 'log_birch'], hardness:8}); // TODO: generate
+    this.registry.registerBlock('logBirch', {texture: ['log_birch_top', 'log_birch_top', 'log_birch'], hardness:8, displayName: 'Birch Wood'}); // TODO: generate
   }
 
   if (this.opts.registerRecipes) {
