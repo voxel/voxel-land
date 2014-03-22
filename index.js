@@ -1,6 +1,7 @@
 
 var webworkify = require('webworkify');
-var unworkify = require('unworkify')
+var unworkify = require('unworkify');
+var ndarray = require('ndarray');
 
 module.exports = function(game, opts) {
   return new Land(game, opts);
@@ -124,10 +125,9 @@ Land.prototype.bindEvents = function() {
   self.worker.addEventListener('message', function(ev) {
     if (ev.data.cmd === 'chunkGenerated') {
       var voxels = new self.game.arrayType(ev.data.voxelBuffer);
-      var chunk = {
-        position: ev.data.position,
-        dims: [self.game.chunkSize, self.game.chunkSize, self.game.chunkSize],
-        voxels: voxels}; 
+      var chunk = ndarray(voxels, [self.game.chunkSize, self.game.chunkSize, self.game.chunkSize]);
+
+      chunk.position = ev.data.position; // TODO: is this right?
 
       self.game.showChunk(chunk);
     } else if (ev.data.cmd === 'decorate') {
