@@ -82,7 +82,7 @@ Land.prototype.registerBlocks = function()  {
     this.registry.registerBlock('oreIron', {displayName: 'Iron Ore', texture: 'iron_ore', hardness:15.0});
     this.registry.registerBlock('brick', {texture: 'brick'}); // some of the these blocks don't really belong here..do they?
     this.registry.registerBlock('obsidian', {texture: 'obsidian', hardness: 128});
-    this.registry.registerBlock('leavesOak', {displayName: 'Oak Leaves', texture: 'leaves_oak', hardness: 0.1, creativeTab: 'plants',
+    this.registry.registerBlock('leavesOak', {displayName: 'Oak Leaves', texture: 'leaves_oak_opaque', hardness: 0.1, creativeTab: 'plants',
       // if voxel-food apple is enabled, drop it when breaking laves (oak apples)
       itemDrop: this.registry.getItemProps('apple') ? 'apple' : null});
     this.registry.registerBlock('glass', {texture: 'glass', hardness: 0.2});
