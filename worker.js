@@ -1,3 +1,5 @@
+//'use strict'; // TODO
+
 var ever = require('ever');
 var createTree = require('voxel-trees');
 var SimplexNoise = require('simplex-noise');
@@ -98,9 +100,6 @@ ChunkGenerator.prototype.populateOreClusters = function(random, chunkX, chunkY, 
     voxels[x + y * width + z * width * width] = value;
   };
 
-  var clustersPerChunk = 30;
-  var clusterSize = nextInt(100) + 50;
-
   for (var i = 0; i < clustersPerChunk; i += 1) {
     var x = nextInt(width - 1);
     var y = nextInt(width - 1);
@@ -135,7 +134,7 @@ ChunkGenerator.prototype.populateCoalOre = function(random, chunkX, chunkY, chun
     return Math.round(random() * max);
   };
 
-  var clustersPerChunk = 30;
+  var clustersPerChunk = 3;
   var clusterSize = nextInt(100) + 50;
   var replaceMaterial = this.opts.materials.stone;
 
@@ -147,7 +146,7 @@ ChunkGenerator.prototype.populateIronOre = function(random, chunkX, chunkY, chun
     return Math.round(random() * max);
   };
 
-  var clustersPerChunk = 20;
+  var clustersPerChunk = 2;
   var clusterSize = nextInt(30) + 10;
   var replaceMaterial = this.opts.materials.stone;
 
