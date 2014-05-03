@@ -92,15 +92,6 @@ ChunkGenerator.prototype.populateOreClusters = function(random, chunkX, chunkY, 
     return Math.round(random() * max);
   };
 
-  // TODO: how about using ndarray
-  var getBlock = function(x, y, z) {
-    return voxels[x + y * width + z * width * width];
-  }
-
-  var setBlock = function(x, y, z, value) {
-    voxels[x + y * width + z * width * width] = value;
-  };
-
   for (var i = 0; i < clustersPerChunk; i += 1) {
     var x = nextInt(width - 1);
     var y = nextInt(width - 1);
@@ -108,8 +99,8 @@ ChunkGenerator.prototype.populateOreClusters = function(random, chunkX, chunkY, 
 
     // replace stone with ore
     for (var j = 0; j < clusterSize; j += 1) {
-      if (getBlock(x, y, z) === replaceMaterial) {
-        setBlock(x, y, z, oreMaterial);
+      if (voxels.get(z, y, x) === replaceMaterial) {
+        voxels.set(z, y, x, oreMaterial);
         //console.log('ore gen at '+[chunkX * width + x, chunkY * width + y, chunkZ * width + z].join(' '));
       }
 
@@ -253,10 +244,10 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
       for (var z = 0; z < width; ++z) {
         var y = heightMap[x + z * width];
 
-        y=1;voxels.set(z,y,x, (pos[0]+pos[2]) & 1 ? this.opts.materials.oreCoal : this.opts.materials.oreIron); continue; // flat checkerboard
+        //y=1;voxels.set(z,y,x, (pos[0]+pos[2]) & 1 ? this.opts.materials.oreCoal : this.opts.materials.oreIron); continue; // flat checkerboard for testing chunk boundaries
 
         // dirt with grass on top
-        //voxels[x + y * width + z * width * width] = this.opts.materials.grass;
+        voxels.set(z,y,x, this.opts.materials.grass);
         while(y-- > 0)
           voxels.set(z,y,x, this.opts.materials.dirt);
 
@@ -264,8 +255,8 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
     }
     // features
     var random = new Alea(pos[0] + pos[1] * width + pos[2] * width * width); // TODO: sufficient?
-    //this.populateChunk(random, pos[0], pos[1], pos[2], heightMap, voxels); // TODO
-    //changes = this.decorate(random, pos[0], pos[1], pos[2], heightMap); // TODO: should run in another worker, to not block terrain gen?
+    this.populateChunk(random, pos[0], pos[1], pos[2], heightMap, voxels);
+    changes = this.decorate(random, pos[0], pos[1], pos[2], heightMap); // TODO: should run in another worker, to not block terrain gen?
   } else if (pos[1] > 0) {
     // empty space above ground
     // TODO: clouds, other above-ground floating structures? https://github.com/deathcap/voxel-land/issues/6
@@ -276,7 +267,7 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
       voxels.data[i] = this.opts.materials.stone;
     }
     var random = new Alea(pos[0] + pos[1] * width + pos[2] * width * width); // TODO: refactor with above
-    //this.populateChunk(random, pos[0], pos[1], pos[2], null, voxels); // TODO
+    this.populateChunk(random, pos[0], pos[1], pos[2], null, voxels);
   }
 
   this.worker.postMessage({cmd: 'chunkGenerated', position: pos, voxelBuffer: buffer}, [buffer]);
