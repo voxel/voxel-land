@@ -226,7 +226,7 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
   var width = this.opts.chunkSize;
   var arrayType = {1:Uint8Array, 2:Uint16Array, 4:Uint32Array}[this.opts.arrayElementSize];
   var buffer = new ArrayBuffer(width * width * width * this.opts.arrayElementSize);
-  var voxels = new arrayType(buffer);
+  var voxels = ndarray(new arrayType(buffer), [width, width, width]);
   var changes = undefined;
 
   /* to prove this code truly is running asynchronously
@@ -253,18 +253,18 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
       for (var z = 0; z < width; ++z) {
         var y = heightMap[x + z * width];
 
-        y=1;voxels[x + y * width + z * width * width] = (pos[0]+pos[2]) & 1 ? this.opts.materials.oreCoal : this.opts.materials.oreIron; continue; // flat checkerboard
+        y=1;voxels.set(z,y,x, (pos[0]+pos[2]) & 1 ? this.opts.materials.oreCoal : this.opts.materials.oreIron); continue; // flat checkerboard
 
         // dirt with grass on top
         //voxels[x + y * width + z * width * width] = this.opts.materials.grass;
         while(y-- > 0)
-          voxels[x + y * width + z * width * width] = this.opts.materials.dirt;
+          voxels.set(z,y,x, this.opts.materials.dirt);
 
       }
     }
     // features
     var random = new Alea(pos[0] + pos[1] * width + pos[2] * width * width); // TODO: sufficient?
-    this.populateChunk(random, pos[0], pos[1], pos[2], heightMap, voxels);
+    //this.populateChunk(random, pos[0], pos[1], pos[2], heightMap, voxels); // TODO
     //changes = this.decorate(random, pos[0], pos[1], pos[2], heightMap); // TODO: should run in another worker, to not block terrain gen?
   } else if (pos[1] > 0) {
     // empty space above ground
@@ -273,10 +273,10 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
     //this.opts.materials.stone=0; // debug ore gen
     // below ground
     for (var i = 0; i < width * width * width; ++i) {
-      voxels[i] = this.opts.materials.stone;
+      voxels.data[i] = this.opts.materials.stone;
     }
     var random = new Alea(pos[0] + pos[1] * width + pos[2] * width * width); // TODO: refactor with above
-    this.populateChunk(random, pos[0], pos[1], pos[2], null, voxels);
+    //this.populateChunk(random, pos[0], pos[1], pos[2], null, voxels); // TODO
   }
 
   this.worker.postMessage({cmd: 'chunkGenerated', position: pos, voxelBuffer: buffer}, [buffer]);
