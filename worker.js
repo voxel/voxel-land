@@ -4,6 +4,7 @@ var ever = require('ever');
 var createTree = require('voxel-trees');
 var SimplexNoise = require('simplex-noise');
 var Alea = require('alea');
+var ndarray = require('ndarray');
 
 function ChunkGenerator(worker, opts) {
   this.worker = worker;
@@ -91,15 +92,6 @@ ChunkGenerator.prototype.populateOreClusters = function(random, chunkX, chunkY, 
     return Math.round(random() * max);
   };
 
-  // TODO: how about using ndarray
-  var getBlock = function(x, y, z) {
-    return voxels[x + y * width + z * width * width];
-  }
-
-  var setBlock = function(x, y, z, value) {
-    voxels[x + y * width + z * width * width] = value;
-  };
-
   for (var i = 0; i < clustersPerChunk; i += 1) {
     var x = nextInt(width - 1);
     var y = nextInt(width - 1);
@@ -107,8 +99,8 @@ ChunkGenerator.prototype.populateOreClusters = function(random, chunkX, chunkY, 
 
     // replace stone with ore
     for (var j = 0; j < clusterSize; j += 1) {
-      if (getBlock(x, y, z) === replaceMaterial) {
-        setBlock(x, y, z, oreMaterial);
+      if (voxels.get(z, y, x) === replaceMaterial) {
+        voxels.set(z, y, x, oreMaterial);
         //console.log('ore gen at '+[chunkX * width + x, chunkY * width + y, chunkZ * width + z].join(' '));
       }
 
@@ -225,7 +217,7 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
   var width = this.opts.chunkSize;
   var arrayType = {1:Uint8Array, 2:Uint16Array, 4:Uint32Array}[this.opts.arrayElementSize];
   var buffer = new ArrayBuffer(width * width * width * this.opts.arrayElementSize);
-  var voxels = new arrayType(buffer);
+  var voxels = ndarray(new arrayType(buffer), [width, width, width]);
   var changes = undefined;
 
   /* to prove this code truly is running asynchronously
@@ -252,10 +244,12 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
       for (var z = 0; z < width; ++z) {
         var y = heightMap[x + z * width];
 
+        //y=1;voxels.set(z,y,x, (pos[0]+pos[2]) & 1 ? this.opts.materials.oreCoal : this.opts.materials.oreIron); continue; // flat checkerboard for testing chunk boundaries
+
         // dirt with grass on top
-        voxels[x + y * width + z * width * width] = this.opts.materials.grass;
+        voxels.set(z,y,x, this.opts.materials.grass);
         while(y-- > 0)
-          voxels[x + y * width + z * width * width] = this.opts.materials.dirt;
+          voxels.set(z,y,x, this.opts.materials.dirt);
 
       }
     }
@@ -270,7 +264,7 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
     //this.opts.materials.stone=0; // debug ore gen
     // below ground
     for (var i = 0; i < width * width * width; ++i) {
-      voxels[i] = this.opts.materials.stone;
+      voxels.data[i] = this.opts.materials.stone;
     }
     var random = new Alea(pos[0] + pos[1] * width + pos[2] * width * width); // TODO: refactor with above
     this.populateChunk(random, pos[0], pos[1], pos[2], null, voxels);
