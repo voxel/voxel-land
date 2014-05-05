@@ -8,7 +8,8 @@ module.exports = function(game, opts) {
 };
 
 module.exports.pluginInfo = {
-  loadAfter: ['voxel-registry', 'voxel-recipes', 'voxel-food']
+  loadAfter: ['voxel-registry', 'voxel-recipes', 'voxel-food'],
+  //clientOnly: true // TODO?
 };
 
 function Land(game, opts) {
