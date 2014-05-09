@@ -198,8 +198,8 @@ ChunkGenerator.prototype.decorate = function(random, chunkX, chunkY, chunkZ, chu
 
     createTree({ 
       random: random,
-      bark: this.opts.materials.bark,
-      leaves: this.opts.materials.leaves,
+      bark: this.opts.materials.logOak,
+      leaves: this.opts.materials.leavesOak,
       position: {x:startX + dx, y:startY + dy, z:startZ + dz},
       treeType: treeType,
       setBlock: function (pos, value) {
@@ -271,6 +271,8 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
   }
 
   this.worker.postMessage({cmd: 'chunkGenerated', position: pos, voxelBuffer: buffer}, [buffer]);
+
+  // add additional decoration edits, which may span multiple loaded chunks
   if (changes) this.worker.postMessage({cmd: 'decorate', changes:changes}); // TODO: use transferrable?
 };
 

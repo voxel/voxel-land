@@ -8,7 +8,7 @@ module.exports = function(game, opts) {
 };
 
 module.exports.pluginInfo = {
-  loadAfter: ['voxel-registry', 'voxel-recipes', 'voxel-food'],
+  loadAfter: ['voxel-registry', 'voxel-recipes', 'voxel-food', 'voxel-mesher'],
   //clientOnly: true // TODO?
 };
 
@@ -84,10 +84,10 @@ Land.prototype.registerBlocks = function()  {
     this.registry.registerBlock('oreIron', {displayName: 'Iron Ore', texture: 'iron_ore', hardness:15.0, requiredTool: 'pickaxe'});
     this.registry.registerBlock('brick', {texture: 'brick'}); // some of the these blocks don't really belong here..do they?
     this.registry.registerBlock('obsidian', {texture: 'obsidian', hardness: 128, requiredTool: 'pickaxe'});
-    this.registry.registerBlock('leavesOak', {displayName: 'Oak Leaves', texture: 'leaves_oak_opaque', hardness: 0.1, creativeTab: 'plants',
+    this.registry.registerBlock('leavesOak', {displayName: 'Oak Leaves', texture: 'leaves_oak', transparent: true, hardness: 0.1, creativeTab: 'plants',
       // if voxel-food apple is enabled, drop it when breaking laves (oak apples)
       itemDrop: this.registry.getItemProps('apple') ? 'apple' : null});
-    this.registry.registerBlock('glass', {texture: 'glass', hardness: 0.2});
+    this.registry.registerBlock('glass', {texture: 'glass', transparent: true, hardness: 0.2});
 
     this.registry.registerBlock('logBirch', {texture: ['log_birch_top', 'log_birch_top', 'log_birch'], hardness:2.0,
       displayName: 'Birch Wood', effectiveTool: 'axe', creativeTab: 'plants'}); // TODO: generate
@@ -102,17 +102,30 @@ Land.prototype.registerBlocks = function()  {
     }
   }
 
-  // for passing to worker
-  // TODO: pass all
-  this.opts.materials = this.opts.materials || {
-    grass: this.registry.getBlockIndex('grass'),
-    dirt: this.registry.getBlockIndex('dirt'),
-    stone: this.registry.getBlockIndex('stone'),
-    bark: this.registry.getBlockIndex('logOak'),
-    leaves: this.registry.getBlockIndex('leavesOak'),
-    oreCoal: this.registry.getBlockIndex('oreCoal'),
-    oreIron: this.registry.getBlockIndex('oreIron')
-  };
+  // materials for passing to worker
+
+  var OPAQUE_BIT = 0;
+  if (game.plugins.get('voxel-mesher')) {
+    // if voxel-mesher loaded, then opaque blocks need the upper bit set for AO (if clear, transparent)
+    OPAQUE_BIT = 1<<15;
+  }
+
+  if (!this.opts.materials) {
+    this.opts.materials = {};
+    for (var blockIndex = 1; blockIndex < this.registry.blockProps.length; blockIndex += 1) {
+      var name = this.registry.getBlockName(blockIndex);
+      var packedIndex = blockIndex;
+
+      if (!this.registry.getBlockProps(name).transparent) {
+        packedIndex |= OPAQUE_BIT;
+      }
+      // else transparent
+      // TODO: fix missing transparency from decorations.. works on https://github.com/deathcap/voxel-example
+      // with OPAQUE_BIT clear, but something about remeshing vs setBlock causes interpreting as opaque..
+
+      this.opts.materials[name] = packedIndex;
+    }
+  }
 };
 
 Land.prototype.bindEvents = function() {
@@ -129,7 +142,7 @@ Land.prototype.bindEvents = function() {
       var voxels = new self.game.arrayType(ev.data.voxelBuffer);
       var chunk = ndarray(voxels, [self.game.chunkSize, self.game.chunkSize, self.game.chunkSize]);
 
-      chunk.position = ev.data.position; // TODO: is this right?
+      chunk.position = ev.data.position;
 
       self.game.showChunk(chunk);
     } else if (ev.data.cmd === 'decorate') {
@@ -138,7 +151,6 @@ Land.prototype.bindEvents = function() {
         var pos = changes[i][0];
         var value = changes[i][1];
 
-        //console.log('set',pos,value);
         self.game.setBlock(pos, value); // TODO: faster mass edit?
         // TODO: what if pos is out of loaded chunk range? doesn't automatically load chunk; change will be lost
       }
