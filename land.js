@@ -105,13 +105,13 @@ Land.prototype.registerBlocks = function()  {
   // for passing to worker
   // TODO: pass all
   this.opts.materials = this.opts.materials || {
-    grass: this.registry.getBlockID('grass'),
-    dirt: this.registry.getBlockID('dirt'),
-    stone: this.registry.getBlockID('stone'),
-    bark: this.registry.getBlockID('logOak'),
-    leaves: this.registry.getBlockID('leavesOak'),
-    oreCoal: this.registry.getBlockID('oreCoal'),
-    oreIron: this.registry.getBlockID('oreIron')
+    grass: this.registry.getBlockIndex('grass'),
+    dirt: this.registry.getBlockIndex('dirt'),
+    stone: this.registry.getBlockIndex('stone'),
+    bark: this.registry.getBlockIndex('logOak'),
+    leaves: this.registry.getBlockIndex('leavesOak'),
+    oreCoal: this.registry.getBlockIndex('oreCoal'),
+    oreIron: this.registry.getBlockIndex('oreIron')
   };
 };
 
