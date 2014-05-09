@@ -2,6 +2,7 @@
   "name": "voxel-land",
   "description": "generate landforms for voxel-engine",
   "version": "0.1.0",
+  "main": "land.js",
   "repository": {
     "type": "git",
     "url": "git@github.com:deathcap/voxel-land.git"
