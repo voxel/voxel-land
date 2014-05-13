@@ -216,8 +216,8 @@ ChunkGenerator.prototype.decorate = function(random, chunkX, chunkY, chunkZ, chu
 ChunkGenerator.prototype.generateChunk = function(pos) {
   var width = this.opts.chunkSize;
   var arrayType = {1:Uint8Array, 2:Uint16Array, 4:Uint32Array}[this.opts.arrayElementSize];
-  var buffer = new ArrayBuffer((width+2) * (width+2) * (width+2) * this.opts.arrayElementSize);
-  var voxels = ndarray(new arrayType(buffer), [width+2, width+2, width+2]);
+  var buffer = new ArrayBuffer(width * width * width * this.opts.arrayElementSize);
+  var voxels = ndarray(new arrayType(buffer), [width, width, width]);
   var changes = undefined;
 
   /* to prove this code truly is running asynchronously
@@ -247,23 +247,23 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
         //y=1;voxels.set(z,y,x, (pos[0]+pos[2]) & 1 ? this.opts.materials.oreCoal : this.opts.materials.oreIron); continue; // flat checkerboard for testing chunk boundaries
 
         // dirt with grass on top
-        voxels.set(z+1,y+1,x+1, this.opts.materials.grass);
+        voxels.set(z,y,x, this.opts.materials.grass);
         while(y-- > 0)
-          voxels.set(z+1,y+1,x+1, this.opts.materials.dirt);
+          voxels.set(z,y,x, this.opts.materials.dirt);
 
       }
     }
     // features
     var random = new Alea(pos[0] + pos[1] * width + pos[2] * width * width); // TODO: sufficient?
     this.populateChunk(random, pos[0], pos[1], pos[2], heightMap, voxels);
-    //TODO changes = this.decorate(random, pos[0], pos[1], pos[2], heightMap); // TODO: should run in another worker, to not block terrain gen?
+    changes = this.decorate(random, pos[0], pos[1], pos[2], heightMap); // TODO: should run in another worker, to not block terrain gen?
   } else if (pos[1] > 0) {
     // empty space above ground
     // TODO: clouds, other above-ground floating structures? https://github.com/deathcap/voxel-land/issues/6
   } else {
     //this.opts.materials.stone=0; // debug ore gen
     // below ground
-    for (var i = 0; i < (width+2) * (width+2) * (width+2); ++i) {
+    for (var i = 0; i < width * width * width; ++i) {
       voxels.data[i] = this.opts.materials.stone;
     }
     var random = new Alea(pos[0] + pos[1] * width + pos[2] * width * width); // TODO: refactor with above

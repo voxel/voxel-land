@@ -140,7 +140,7 @@ Land.prototype.bindEvents = function() {
   self.worker.addEventListener('message', function(ev) {
     if (ev.data.cmd === 'chunkGenerated') {
       var voxels = new self.game.arrayType(ev.data.voxelBuffer);
-      var chunk = ndarray(voxels, [self.opts.chunkSize+2, self.opts.chunkSize+2, self.opts.chunkSize+2]);
+      var chunk = ndarray(voxels, [self.opts.chunkSize, self.opts.chunkSize, self.opts.chunkSize]);
 
       chunk.position = ev.data.position;
 
