@@ -30,6 +30,8 @@ function Land(game, opts) {
   opts.treesScale = opts.treesScale || 200;
   opts.treesMaxDensity = (opts.treesMaxDensity !== undefined) ? opts.treesMaxDensity : 5;
   opts.chunkSize = game.chunkSize || 32;
+  opts.chunkPad = game.chunkPad;
+  if (!opts.chunkPad) throw new Error('voxel-land requires voxel-engine with game.chunkPad');
 
   opts.registerBlocks = opts.registerBlocks === undefined ? true : opts.registerBlocks;
   opts.registerItems = opts.registerItems === undefined ? true : opts.registerItems;
@@ -140,7 +142,7 @@ Land.prototype.bindEvents = function() {
   self.worker.addEventListener('message', function(ev) {
     if (ev.data.cmd === 'chunkGenerated') {
       var voxels = new self.game.arrayType(ev.data.voxelBuffer);
-      var chunk = ndarray(voxels, [self.opts.chunkSize, self.opts.chunkSize, self.opts.chunkSize]);
+      var chunk = ndarray(voxels, [self.opts.chunkSize+self.opts.chunkPad, self.opts.chunkSize+self.opts.chunkPad, self.opts.chunkSize+self.opts.chunkPad]);
 
       chunk.position = ev.data.position;
 

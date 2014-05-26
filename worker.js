@@ -5,6 +5,7 @@ var createTree = require('voxel-trees');
 var SimplexNoise = require('simplex-noise');
 var Alea = require('alea');
 var ndarray = require('ndarray');
+var ops = require('ndarray-ops');
 
 function ChunkGenerator(worker, opts) {
   this.worker = worker;
@@ -215,9 +216,15 @@ ChunkGenerator.prototype.decorate = function(random, chunkX, chunkY, chunkZ, chu
 
 ChunkGenerator.prototype.generateChunk = function(pos) {
   var width = this.opts.chunkSize;
+  var pad = this.opts.chunkPad;
   var arrayType = {1:Uint8Array, 2:Uint16Array, 4:Uint32Array}[this.opts.arrayElementSize];
-  var buffer = new ArrayBuffer(width * width * width * this.opts.arrayElementSize);
-  var voxels = ndarray(new arrayType(buffer), [width, width, width]);
+
+  // create underlying array padded 2 voxels on each edge, but also an unpadded view for populating
+  var buffer = new ArrayBuffer((width+pad) * (width+pad) * (width+pad) * this.opts.arrayElementSize);
+  var voxelsPadded = ndarray(new arrayType(buffer), [width+pad, width+pad, width+pad]);
+  var h = pad >> 1;
+  var voxels = voxelsPadded.lo(h,h,h).hi(width,width,width);
+
   var changes = undefined;
 
   /* to prove this code truly is running asynchronously
@@ -262,13 +269,14 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
     // TODO: clouds, other above-ground floating structures? https://github.com/deathcap/voxel-land/issues/6
   } else {
     //this.opts.materials.stone=0; // debug ore gen
-    // below ground
-    for (var i = 0; i < width * width * width; ++i) {
-      voxels.data[i] = this.opts.materials.stone;
-    }
+    // below ground - starts out as all stone
+    ops.assigns(voxels, this.opts.materials.stone);
+
     var random = new Alea(pos[0] + pos[1] * width + pos[2] * width * width); // TODO: refactor with above
     this.populateChunk(random, pos[0], pos[1], pos[2], null, voxels);
   }
+
+  //if (pos.join('|') !== '0|0|0' && pos.join('|') !== '0|-1|0') return; // only a few chunks for testing
 
   this.worker.postMessage({cmd: 'chunkGenerated', position: pos, voxelBuffer: buffer}, [buffer]);
 
