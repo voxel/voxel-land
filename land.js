@@ -105,25 +105,11 @@ Land.prototype.registerBlocks = function()  {
 
   // materials for passing to worker
 
-  var OPAQUE_BIT = 0;
-  if (game.plugins.get('voxel-mesher')) {
-    // if voxel-mesher loaded, then opaque blocks need the upper bit set for AO (if clear, transparent)
-    OPAQUE_BIT = 1<<15;
-  }
-
   if (!this.opts.materials) {
     this.opts.materials = {};
     for (var blockIndex = 1; blockIndex < this.registry.blockProps.length; blockIndex += 1) {
       var name = this.registry.getBlockName(blockIndex);
-      var packedIndex = blockIndex;
-
-      if (!this.registry.getBlockProps(name).transparent) {
-        packedIndex |= OPAQUE_BIT;
-      }
-      // else transparent
-      // TODO: fix missing transparency from decorations.. works on https://github.com/deathcap/voxel-example
-      // with OPAQUE_BIT clear, but something about remeshing vs setBlock causes interpreting as opaque..
-
+      var packedIndex = this.registry.getPackedBlockIndex(name); // includes opaque bit
       this.opts.materials[name] = packedIndex;
     }
   }
