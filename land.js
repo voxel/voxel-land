@@ -30,8 +30,7 @@ function Land(game, opts) {
   opts.treesScale = opts.treesScale || 200;
   opts.treesMaxDensity = (opts.treesMaxDensity !== undefined) ? opts.treesMaxDensity : 5;
   opts.chunkSize = game.chunkSize || 32;
-  opts.chunkPad = game.chunkPad;
-  if (!opts.chunkPad) throw new Error('voxel-land requires voxel-engine with game.chunkPad');
+  opts.chunkPad = game.chunkPad|0;
 
   opts.registerBlocks = opts.registerBlocks === undefined ? true : opts.registerBlocks;
   opts.registerItems = opts.registerItems === undefined ? true : opts.registerItems;
