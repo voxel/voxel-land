@@ -88,7 +88,6 @@ Land.prototype.registerBlocks = function()  {
     this.registry.registerBlock('leavesOak', {displayName: 'Oak Leaves', texture: 'leaves_oak', transparent: true, hardness: 0.1, creativeTab: 'plants',
       // if voxel-food apple is enabled, drop it when breaking laves (oak apples)
       itemDrop: this.registry.getItemProps('apple') ? 'apple' : null});
-    this.registry.registerBlock('glass', {texture: 'glass', transparent: true, hardness: 0.2});
 
     this.registry.registerBlock('logBirch', {texture: ['log_birch_top', 'log_birch_top', 'log_birch'], hardness:2.0,
       displayName: 'Birch Wood', effectiveTool: 'axe', creativeTab: 'plants'}); // TODO: generate
