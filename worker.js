@@ -100,8 +100,8 @@ ChunkGenerator.prototype.populateOreClusters = function(random, chunkX, chunkY, 
 
     // replace stone with ore
     for (var j = 0; j < clusterSize; j += 1) {
-      if (voxels.get(z, y, x) === replaceMaterial) {
-        voxels.set(z, y, x, oreMaterial);
+      if (voxels.get(x, y, z) === replaceMaterial) {
+        voxels.set(x, y, z, oreMaterial);
         //console.log('ore gen at '+[chunkX * width + x, chunkY * width + y, chunkZ * width + z].join(' '));
       }
 
@@ -251,12 +251,12 @@ ChunkGenerator.prototype.generateChunk = function(pos) {
       for (var z = 0; z < width; ++z) {
         var y = heightMap[x + z * width];
 
-        //y=1;voxels.set(z,y,x, (pos[0]+pos[2]) & 1 ? this.opts.materials.oreCoal : this.opts.materials.oreIron); continue; // flat checkerboard for testing chunk boundaries
+        //y=1;voxels.set(x,y,z, (pos[0]+pos[2]) & 1 ? this.opts.materials.oreCoal : this.opts.materials.oreIron); continue; // flat checkerboard for testing chunk boundaries
 
         // dirt with grass on top
-        voxels.set(z,y,x, this.opts.materials.grass);
+        voxels.set(x,y,z, this.opts.materials.grass);
         while(y-- > 0)
-          voxels.set(z,y,x, this.opts.materials.dirt);
+          voxels.set(x,y,z, this.opts.materials.dirt);
 
       }
     }
