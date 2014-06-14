@@ -108,7 +108,7 @@ Land.prototype.registerBlocks = function()  {
     this.opts.materials = {};
     for (var blockIndex = 1; blockIndex < this.registry.blockProps.length; blockIndex += 1) {
       var name = this.registry.getBlockName(blockIndex);
-      var packedIndex = this.registry.getPackedBlockIndex(name); // includes opaque bit
+      var packedIndex = this.registry.getBlockIndex(name);
       this.opts.materials[name] = packedIndex;
     }
   }
