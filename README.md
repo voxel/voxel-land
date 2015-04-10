@@ -15,6 +15,8 @@ Beneath the grass is dirt, and then all chunks below are stone:
 
 ## Usage
 
+** This plugin MUST be used with the [stackgl to be version of voxel-engine](https://github.com/maxogden/voxel-engine/pull/103)
+
     var createLand = require('voxel-land');
     var land = createLand(game, opts);
     land.enable();
