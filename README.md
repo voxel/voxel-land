@@ -16,6 +16,8 @@ Beneath the grass is dirt, and then all chunks below are stone:
 ## Usage
 
 Load with [voxel-plugins](https://github.com/deathcap/voxel-plugins).
+Requires the [voxel-registry](https://github.com/deathcap/voxel-registry) plugin
+to be loaded as well.
 
 voxel-land generates chunks as [ndarray](https://github.com/scijs/ndarray)s,
 so it requires [voxel-engine-stackgl](https://github.com/deathcap/voxel-engine-stackgl)
