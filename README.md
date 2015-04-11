@@ -15,15 +15,13 @@ Beneath the grass is dirt, and then all chunks below are stone:
 
 ## Usage
 
-    var createLand = require('voxel-land');
-    var land = createLand(game, opts);
-    land.enable();
+Load with [voxel-plugins](https://github.com/deathcap/voxel-plugins).
 
-or with [voxel-plugins](https://github.com/deathcap/voxel-plugins):
+voxel-land generates chunks as [ndarray](https://github.com/scijs/ndarray)s,
+so it requires [voxel-engine-stackgl](https://github.com/deathcap/voxel-engine-stackgl)
+(voxel-land 0.1.0 and earlier were for [voxel-engine](https://github.com/maxogden/voxel-engine)).
 
-    plugins.load('land', opts);
-
-The voxel-engine game options should have `generateChunks: false`. voxel-land
+The voxel-engine-stackgl game options should have `generateChunks: false`. voxel-land
 will listen on `game.voxel` for the `missingChunk` event and generate the new
 chunks. The listener can be unregistered with `land.disable()`.
 
