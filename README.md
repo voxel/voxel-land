@@ -25,7 +25,7 @@ so it requires [voxel-engine-stackgl](https://github.com/deathcap/voxel-engine-s
 
 The voxel-engine-stackgl game options should have `generateChunks: false`. voxel-land
 will listen on `game.voxel` for the `missingChunk` event and generate the new
-chunks. The listener can be unregistered with `land.disable()`.
+chunks. The generator can be unregistered by disabling the plugin.
 
 ## License
 
